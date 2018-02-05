@@ -376,6 +376,79 @@ E5:	CMPQ BX, R11		// i < n
 	RET
 
 
+
+// func addMulVVW(z, x []Word, y Word) (c Word)
+TEXT ·addMulVVW_opt(SB),NOSPLIT,$0
+    MOVQ z+0(FP), R10
+	MOVQ x+24(FP), R8
+	MOVQ y+48(FP), R9
+	MOVQ z_len+8(FP), R11
+	MOVQ $0, BX		// i = 0
+	MOVQ $0, CX		// c = 0
+	MOVQ R11, R12
+	ANDQ $-4, R12
+	CMPQ R11, $4
+	JAE A6
+	JMP E6
+
+A6:
+	MOVQ (R8)(BX*8), AX
+	MULQ R9
+	ADDQ (R10)(BX*8), AX
+	ADCQ $0, DX
+	ADDQ CX, AX
+	ADCQ $0, DX
+	MOVQ DX, CX
+	MOVQ AX, (R10)(BX*8)
+
+	MOVQ (8)(R8)(BX*8), AX
+	MULQ R9
+	ADDQ (8)(R10)(BX*8), AX
+	ADCQ $0, DX
+	ADDQ CX, AX
+	ADCQ $0, DX
+	MOVQ DX, CX
+	MOVQ AX, (8)(R10)(BX*8)
+
+	MOVQ (16)(R8)(BX*8), AX
+	MULQ R9
+	ADDQ (16)(R10)(BX*8), AX
+	ADCQ $0, DX
+	ADDQ CX, AX
+	ADCQ $0, DX
+	MOVQ DX, CX
+	MOVQ AX, (16)(R10)(BX*8)
+
+	MOVQ (24)(R8)(BX*8), AX
+	MULQ R9
+	ADDQ (24)(R10)(BX*8), AX
+	ADCQ $0, DX
+	ADDQ CX, AX
+	ADCQ $0, DX
+	MOVQ DX, CX
+	MOVQ AX, (24)(R10)(BX*8)
+
+	ADDQ $4, BX
+	CMPQ BX, R12
+	JL A6
+	JMP E6
+
+L6:	MOVQ (R8)(BX*8), AX
+	MULQ R9
+	ADDQ CX, AX
+	ADCQ $0, DX
+	ADDQ AX, (R10)(BX*8)
+	ADCQ $0, DX
+	MOVQ DX, CX
+	ADDQ $1, BX		// i++
+
+E6:	CMPQ BX, R11		// i < n
+	JL L6
+
+	MOVQ CX, c+56(FP)
+	RET
+
+
 // func addMulVVW(z, x []Word, y Word) (c Word)
 TEXT ·addMulVVW(SB),NOSPLIT,$0
 	MOVQ z+0(FP), R10

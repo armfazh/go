@@ -207,22 +207,42 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	if len(x) != n || len(y) != n || len(m) != n {
 		panic("math/big: mismatched montgomery number lengths")
 	}
+
 	z = z.make(n)
 	z.clear()
 	var c Word
-	for i := 0; i < n; i++ {
-		d := y[i]
-		c2 := addMulVVW(z, x, d)
-		t := z[0] * k
-		c3 := addMulVVW(z, m, t)
-		copy(z, z[1:])
-		cx := c + c2
-		cy := cx + c3
-		z[n-1] = cy
-		if cx < c2 || cy < c3 {
-			c = 1
-		} else {
-			c = 0
+	if n==16 {
+		println("case n=16")
+		for i := 0; i < n; i++ {
+			d := y[i]
+			c2 := addMulVVW_opt(z, x, d)
+			t := z[0] * k
+			c3 := addMulVVW_opt(z, m, t)
+			copy(z, z[1:])
+			cx := c + c2
+			cy := cx + c3
+			z[n-1] = cy
+			if cx < c2 || cy < c3 {
+				c = 1
+			} else {
+				c = 0
+			}
+		}
+	} else{
+		for i := 0; i < n; i++ {
+			d := y[i]
+			c2 := addMulVVW(z, x, d)
+			t := z[0] * k
+			c3 := addMulVVW(z, m, t)
+			copy(z, z[1:])
+			cx := c + c2
+			cy := cx + c3
+			z[n-1] = cy
+			if cx < c2 || cy < c3 {
+				c = 1
+			} else {
+				c = 0
+			}
 		}
 	}
 	if c != 0 {
@@ -230,6 +250,7 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	}
 	return z
 }
+
 
 // Fast version of z[0:n+n>>1].add(z[0:n+n>>1], x[0:n]) w/o bounds checks.
 // Factored out for readability - do not use outside karatsuba.
