@@ -504,11 +504,10 @@ func TestMontgomery1024(t *testing.T) {
 		print("x: ");println(test.x)
 		print("y: ");println(test.y)
 
-		var c Word
 		for i := 0; i < n; i++ {
-			c = fios(zz, x, y[i], m, k0)
+			fios(zz, x, y[i], m, k0)
 		}
-		fmt.Printf("zz: %s\n c: 0x%x \n",zz.utoa(16),c)
+		fmt.Printf("zz: %s\n",zz.utoa(16))
 
 
 /// My Main

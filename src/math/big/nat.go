@@ -204,35 +204,17 @@ func (z nat) montgomery1024(x, y, m nat, k Word, n int) nat {
 	// (required by addMulVVW and the for loop).
 	// It also assumes that x, y are already reduced mod m,
 	// or else the result will not be properly reduced.
-	if len(x) != n || len(y) != n || len(m) != n {
+	if len(x) != n || len(y) != n || len(m) != n || n !=16{
 		panic("math/big: mismatched montgomery number lengths")
 	}
-	if n !=16 {
-		panic("math/big: special function for n=16")
-	}
 
-	z = z.make(n)
+	z = z.make(n+2)
 	z.clear()
-	//println("n:")
-	//println(n)
 
-	var c Word
 	for i := 0; i < n; i++ {
-		c = fios(z, x, y[i], m, k)
-		//c2 := addMulVVW_opt(z, x, d)
-		//t := z[0] * k
-		//c3 := addMulVVW_opt(z, m, t)
-		/* copy(z, z[1:])
-		cx := c + c2
-		//cy := cx + c3
-		z[n-1] = cx
-		if cx < c2 /*|| cy < c3* {
-			c = 1
-		} else {
-			c = 0
-		} */
+		fios(z, x, y[i], m, k)
 	}
-	if c != 0 {
+	if z[n+1] != 0 {
 		subVV(z, z, m)
 	}
 	return z
