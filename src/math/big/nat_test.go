@@ -372,13 +372,30 @@ var montgomeryTests = []struct {
 		"0x5c0d52f451aec609b15da8e5e5626c4eaa88723bdeac9d25ca9b961269400410ca208a16af9c2fb07d7a11c7772cba02c22f9711078d51a3797eb18e691295293284d988e349fa6deba46b25a4ecd9f715",
 		"0x92fcad4b5c0d52f451aec609b15da8e5e5626c4eaa88723bdeac9d25ca9b961269400410ca208a16af9c2fb07d799c32fe2f3cc5422f9711078d51a3797eb18e691295293284d8f5e69caf6decddfe1df6",
 	},
-	{//new entry
+	{ //Case 1:  x*y*2^-nW  < m < 2^nW
 		"0x1c3f60d0ed3aec79b5017c412a151ee4e7c96e660886e4cc4762ce871f33f73ce7c5d46398e2911daca89cc912e62ae8e45e8099b3518b54d4442636bfb34f720540461eba6ac58c429c241e1ea74b42d24495adf20ef28e8f7c697ae2021a4f36b17f355d545ca44b16be4cb8c3d54b4b908e164c71b56fef23724f37f5f9b3",
 		"0x1bd7f69a60e9d8703f2d8073fb8b097bfd83f06348f29566ce312dcc2d885bef2180849be279eb8bf83a87f2aae8734bf8ad05cf213c0a87ba54e2e9a787e9274686c670ec796d040160e448884cbaee068eed9ed34f8fa6956d654792926384742d7a1f395d9d69da645502c71749dd1fb0edaeee08255c83a13dbac1ab98ca",
 		"0x57a229c792e6ae02349ec59372d897f9c7ed1fe3e7f60dd8e9b4423ad7f8e3cc1320e32b0a6a5d15cca86c2ae0236b22bf0871ce9130b81cab0644b3dbe0d6952df7d37f52832dc5ff7c85da47689abed11ed4ce22df7ef29578958d86e73acf6f0f85c0486aadc680eb64c83d4e8d3422490868bf63104fdd3fef0b7b717407",
 		0x20bd33babeb44649,
 		"0x394e6aba58b2b5be190512e853470548cde44b0d7fced614ddb764c4b292c29a17f76f404c4df8d1ecbe5c9f56781989b963fc20f1cde4381291d7b3b2a3ba099e68b9268d8b4845c73ba9f5b19f8a832ae1332b3a40c54d28494cb54abd1fc6d249228cadec411b5dcdd82a45f8e99a4df894950810fcb58a0a552486fc3738",
 		"0x394e6aba58b2b5be190512e853470548cde44b0d7fced614ddb764c4b292c29a17f76f404c4df8d1ecbe5c9f56781989b963fc20f1cde4381291d7b3b2a3ba099e68b9268d8b4845c73ba9f5b19f8a832ae1332b3a40c54d28494cb54abd1fc6d249228cadec411b5dcdd82a45f8e99a4df894950810fcb58a0a552486fc3738",
+	},
+	/*
+		{//Case 2:  m < x*y*2^-nW   < 2^nW
+			"0x736d05da758a54b08c25dbf0f669958f489297b018af1adaed0ed1575e4f7beb6e209e2e3387bc7413ebdfd18185aa187f1e8f709b7ab0855889b440805a6e8d53aaadeb03c598f67da97c066c993c833a141628813cfb96c60c61787ed1881d9886cfa9c18b30156c1b1ba07c955ca23e9456a3e9080c57bcfccd1e94b1086c",
+			"0x6dc27f367ee65e7489b89b66c07a5639abfff08d80606750896ce21ab06fceb3801ddff04c820973c73a1bbc07d82e083bec2dc996d8f6fbb0063396cb49c8d6988eaa9367fbcc738a85b5fa3cb2e389e1f85246c3f8d79a709bf176bc7d55ec9db2b40ebf42e5845dc1d0d4fb96c8b0590a1a00cb507795fd1d81cbc13f12b2",
+			"0x7833b0ffc6beb44fd580fd2e30ca6be7830d13da8c82363c52880a697af083f6e85c569290db3d8fc526d27f4d6166d0dd6193bca44b28e93a40f0db34efea2e7ad5361a88e1e22515d75e6a6bc9125ce0ca732d7772d9f590b799d4d391339cd023e31ced56ae8a2477fbbfaaa5d4db2813649d6b30c38f396f4c9466b4e8fd",
+			0x5cb5faacd5738bab,
+			"0x70425cce9e548c326ee99ead35ec1710dddcef113ea5742dd71de2a899e75f50d1dfc351cb986c2fa9690c1bc279409772bcd19766d3df93c3f30d98edca2cf456adfbd2c920d726f4ef6ef76f202767427a8dce5d1fe344736b0f9ba2355eb16bc2686a6a5da551facb11cbf569e8b9cc9fcca181081664fa0e84aaa7ff2aeb",
+			"0xfa03ec6571d2c3a1f367c0476286e61c729c69f1dc94cb0b001dfa9ae363a33af39263dcc914aafb82017732c57cd675a6d0ecafbd03b66891c20aa29e2ca04392f2c1951100a776a60053025c1bbb6848f0f382612a4b728c1670eee11609eec1e4e37c747df6a78f9244d1b2b5c083ed356881d4ff3ac214e0946afb86b79",
+		},*/
+	{ //Case 3:  x*y*2^-nW > 2^nW
+		"0xea857d8cca47a109e9a5c64cd6d1b65a4d41fbe41b9cbc6c16cf8681e98d78c9053b59dc098b68074ca9e032c3660be40aabb98670b6fe8359137dc8a48df9135d72226e74c8e44f59f93c97d41d338857f8787766b600105043cd1d842d278de3d6a148bd2175930e49595bae30228a4c7339cde307df1b23932bdf43ae963f",
+		"0xe3ac04d16995f03d27242e46d00b65b9285529c4867e0a0063cd54daea3bac71c5b8e7cd5f310a413f220bd2f044b8f7b347ab8e9d146ce1ce02291fe40d26bd97fd1ea5551c396ac06d8e105ef20d7108fbcb47e5011da259f1cb6d18dd4997af77dfb6252e6902b426a53c884e9bcf41f8aa62f63c49ee1032329a8147aed1",
+		"0xfc755cd59ea2247c52fc89d58724b1baf49c23fcf58e2ce5ce21c84d07c7f3a4f70dad5ac1e9e6bbd9b46cdf26a04fd29e4e974d1f1d493183e7fc4f8b0f154635b0af77a019ef4535bfb34f7b7fe25cce66933bd06ac499bc9a6b0328512c49ed99d05f10a77285c6caa6a63c6b0d955d418ccd712578388c363e9a2210a1eb",
+		0x53c2b86cf2d6813d,
+		"0x859edd8c8ea20e5e0010de7828a68ffe160b1f6c8aa65cd275db301129614447233e224b55fc46b944efa226169198088a4c3c02ba3838746aa9a0aa5dc9acce49bb0a0550dd76bf0ecbeff6bd85fa261cd536a321b769995a3382e3909747142067e1ba544fe765f30d24939482860a9f6922b0085dc200abe01ef0af315c6b",
+		"0x6a59882e1cda7c042c24cbdf979397ecf83b9136db7f0beb607dfcf81633c20aa8b30012737653660ee85b6b2cd56b17e81823e697732e548574114953cbbb2c92e8812b8394e9633a46655bfb02644291a931f5a806bb4aabbd98db438b6571f901744f36e75e9effccf890fbb3e5c3892c09ae1bef6ec76ca857c8e6968911",
 	},
 }
 
@@ -401,7 +418,7 @@ func TestMontgomery(t *testing.T) {
 			t.Errorf("#%d: x > m (0x%s > 0x%s; use 0x%s)", i, x.utoa(16), m.utoa(16), r.utoa(16))
 		}
 		if y.cmp(m) > 0 {
-			_, r := nat(nil).div(nil, x, m)
+			_, r := nat(nil).div(nil, y, m)
 			t.Errorf("#%d: y > m (0x%s > 0x%s; use 0x%s)", i, y.utoa(16), m.utoa(16), r.utoa(16))
 		}
 
@@ -455,7 +472,7 @@ func TestMontgomery1024(t *testing.T) {
 			y = append(y, 0)
 		}
 
-		if len(m) !=16 {
+		if len(m) != 16 {
 			continue
 		}
 		if x.cmp(m) > 0 {
@@ -463,7 +480,7 @@ func TestMontgomery1024(t *testing.T) {
 			t.Errorf("#%d: x > m (0x%s > 0x%s; use 0x%s)", i, x.utoa(16), m.utoa(16), r.utoa(16))
 		}
 		if y.cmp(m) > 0 {
-			_, r := nat(nil).div(nil, x, m)
+			_, r := nat(nil).div(nil, y, m)
 			t.Errorf("#%d: y > m (0x%s > 0x%s; use 0x%s)", i, y.utoa(16), m.utoa(16), r.utoa(16))
 		}
 
@@ -494,24 +511,34 @@ func TestMontgomery1024(t *testing.T) {
 			t.Errorf("#%d: k0 in table=%#x, computed=%#x\n", i, test.k0, k0)
 		}
 
-/// My Main
-		println("===== START MAIN")
-		n := len(m)
-		zz := new(nat).make(n+2)
-		zz.clear()
+		/// My Main
+		if false {
+			println("===== START MAIN")
+			n := len(m)
+			zz := new(nat).make(n + 2)
+			zz.clear()
 
-		print("n:");println(n)
-		print("x: ");println(test.x)
-		print("y: ");println(test.y)
+			print("n:")
+			println(n)
+			print("x: ")
+			println(test.x)
+			print("y: ")
+			println(test.y)
+			print("m: ")
+			println(test.m)
 
-		for i := 0; i < n; i++ {
-			fios(zz, x, y[i], m, k0)
+			for i := 0; i < n; i++ {
+				fios(zz, x, y[i], m, k0)
+			}
+			fmt.Printf(" c: %d\n", zz[n])
+			if zz[n] != 0 {
+				subVV(zz, zz, m)
+			}
+			fmt.Printf("zz: %s\n", zz.utoa(16))
+			/// My Main
+			println("===== EOF MAIN")
 		}
-		fmt.Printf("zz: %s\n",zz.utoa(16))
 
-
-/// My Main
-	println("===== EOF MAIN")
 		// check montgomery with correct k0 produces correct output
 		z := nat(nil).montgomery1024(x, y, m, k0, len(m))
 		z = z.norm()
@@ -520,7 +547,6 @@ func TestMontgomery1024(t *testing.T) {
 		}
 	}
 }
-
 
 func BenchmarkMontgomery(b *testing.B) {
 	for _, n := range benchSizes {
@@ -546,7 +572,7 @@ func BenchmarkMontgomery1024(b *testing.B) {
 		if isRaceBuilder && n > 1e3 {
 			continue
 		}
-		if n!=16{
+		if n != 16 {
 			continue
 		}
 		x := rndV(n)
@@ -562,7 +588,6 @@ func BenchmarkMontgomery1024(b *testing.B) {
 		})
 	}
 }
-
 
 var expNNTests = []struct {
 	x, y, m string

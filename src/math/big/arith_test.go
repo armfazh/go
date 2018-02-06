@@ -396,23 +396,3 @@ func BenchmarkAddMulVVW(b *testing.B) {
 	}
 }
 
-func BenchmarkAddMulVVW_opt(b *testing.B) {
-	for _, n := range benchSizes {
-		if isRaceBuilder && n > 1e3 {
-			continue
-		}
-		if n != 16 {
-			continue
-		}
-		x := rndV(n)
-		y := rndW()
-		z := make([]Word, n)
-		b.Run(fmt.Sprint(n), func(b *testing.B) {
-			b.SetBytes(int64(n * _W))
-			for i := 0; i < b.N; i++ {
-				addMulVVW_opt(z, x, y)
-			}
-		})
-	}
-}
-
