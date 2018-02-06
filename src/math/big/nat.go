@@ -205,18 +205,18 @@ func (z nat) montgomery1024(x, y, m nat, k Word, n int) nat {
 	// It also assumes that x, y are already reduced mod m,
 	// or else the result will not be properly reduced.
 	if len(x) != n || len(y) != n || len(m) != n || n != 16 {
-		panic("math/big: mismatched montgomery number lengths")
+		panic("math/big: mismatched montgomery number lengths n!=16")
 	}
 
 	z = z.make(n + 2)
 
- 	for i := 0; i < n; i++ {
+	for i := 0; i < n; i++ {
 		fios(z, x, y[i], m, k)
 	}
 	if z[n] != 0 {
 		subVV(z, z, m)
 	}
-	return z
+	return z[:n]
 }
 
 // montgomery computes z mod m = x*y*2**(-n*_W) mod m,
@@ -234,24 +234,37 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	// It also assumes that x, y are already reduced mod m,
 	// or else the result will not be properly reduced.
 	if len(x) != n || len(y) != n || len(m) != n {
+		println(len(x))
+		println(len(y))
+		println(len(m))
 		panic("math/big: mismatched montgomery number lengths")
 	}
-	z = z.make(n)
-	z.clear()
 	var c Word
-	for i := 0; i < n; i++ {
-		d := y[i]
-		c2 := addMulVVW(z, x, d)
-		t := z[0] * k
-		c3 := addMulVVW(z, m, t)
-		copy(z, z[1:])
-		cx := c + c2
-		cy := cx + c3
-		z[n-1] = cy
-		if cx < c2 || cy < c3 {
-			c = 1
-		} else {
-			c = 0
+	if n == 16 {
+		z = z.make(n+2)
+		z.clear()
+		for i := 0; i < n; i++ {
+			fios(z, x, y[i], m, k)
+		}
+		c = z[n]
+		z = z[:n]
+	} else {
+		z = z.make(n)
+		z.clear()
+		for i := 0; i < n; i++ {
+			d := y[i]
+			c2 := addMulVVW(z, x, d)
+			t := z[0] * k
+			c3 := addMulVVW(z, m, t)
+			copy(z, z[1:])
+			cx := c + c2
+			cy := cx + c3
+			z[n-1] = cy
+			if cx < c2 || cy < c3 {
+				c = 1
+			} else {
+				c = 0
+			}
 		}
 	}
 	if c != 0 {
