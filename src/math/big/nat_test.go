@@ -441,6 +441,125 @@ func TestMontgomery(t *testing.T) {
 	}
 }
 
+func TestMontgomery1024(t *testing.T) {
+	one := NewInt(1)
+	_B := new(Int).Lsh(one, _W)
+	for i, test := range montgomeryTests {
+		x := natFromString(test.x)
+		y := natFromString(test.y)
+		m := natFromString(test.m)
+		for len(x) < len(m) {
+			x = append(x, 0)
+		}
+		for len(y) < len(m) {
+			y = append(y, 0)
+		}
+
+		if len(m) !=16 {
+			continue
+		}
+		if x.cmp(m) > 0 {
+			_, r := nat(nil).div(nil, x, m)
+			t.Errorf("#%d: x > m (0x%s > 0x%s; use 0x%s)", i, x.utoa(16), m.utoa(16), r.utoa(16))
+		}
+		if y.cmp(m) > 0 {
+			_, r := nat(nil).div(nil, x, m)
+			t.Errorf("#%d: y > m (0x%s > 0x%s; use 0x%s)", i, y.utoa(16), m.utoa(16), r.utoa(16))
+		}
+
+		var out nat
+		if _W == 32 {
+			out = natFromString(test.out32)
+		} else {
+			out = natFromString(test.out64)
+		}
+
+		// t.Logf("#%d: len=%d\n", i, len(m))
+
+		// check output in table
+		xi := &Int{abs: x}
+		yi := &Int{abs: y}
+		mi := &Int{abs: m}
+		p := new(Int).Mod(new(Int).Mul(xi, new(Int).Mul(yi, new(Int).ModInverse(new(Int).Lsh(one, uint(len(m))*_W), mi))), mi)
+		if out.cmp(p.abs.norm()) != 0 {
+			t.Errorf("#%d: out in table=0x%s, computed=0x%s", i, out.utoa(16), p.abs.norm().utoa(16))
+		}
+
+		// check k0 in table
+		k := new(Int).Mod(&Int{abs: m}, _B)
+		k = new(Int).Sub(_B, k)
+		k = new(Int).Mod(k, _B)
+		k0 := Word(new(Int).ModInverse(k, _B).Uint64())
+		if k0 != Word(test.k0) {
+			t.Errorf("#%d: k0 in table=%#x, computed=%#x\n", i, test.k0, k0)
+		}
+
+/// My Main
+		println("===== START MAIN")
+		n := len(m)
+		zz := new(nat).make(n)
+
+		print("x: ");println(test.x)
+		print("y: ");println(test.y)
+
+		c := fios(zz,x,y[0],m,k0)
+		fmt.Printf("zz: %s\n c: %d \n",zz.utoa(16),c)
+
+
+/// My Main
+	println("===== EOF MAIN")
+		// check montgomery with correct k0 produces correct output
+		z := nat(nil).montgomery1024(x, y, m, k0, len(m))
+		z = z.norm()
+		if z.cmp(out) != 0 {
+			t.Errorf("#%d: got 0x%s want 0x%s", i, z.utoa(16), out.utoa(16))
+		}
+	}
+}
+
+
+func BenchmarkMontgomery(b *testing.B) {
+	for _, n := range benchSizes {
+		if isRaceBuilder && n > 1e3 {
+			continue
+		}
+		x := rndV(n)
+		y := rndV(n)
+		m := rndV(n)
+		k0 := rndW()
+		z := make([]Word, n)
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				z = nat(nil).montgomery(x, y, m, k0, len(m))
+			}
+		})
+	}
+}
+
+func BenchmarkMontgomery1024(b *testing.B) {
+	for _, n := range benchSizes {
+		if isRaceBuilder && n > 1e3 {
+			continue
+		}
+		if n!=16{
+			continue
+		}
+		x := rndV(n)
+		y := rndV(n)
+		m := rndV(n)
+		k0 := rndW()
+		z := make([]Word, n)
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				z = nat(nil).montgomery1024(x, y, m, k0, len(m))
+			}
+		})
+	}
+}
+
+
 var expNNTests = []struct {
 	x, y, m string
 	out     string
