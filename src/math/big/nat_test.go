@@ -497,13 +497,18 @@ func TestMontgomery1024(t *testing.T) {
 /// My Main
 		println("===== START MAIN")
 		n := len(m)
-		zz := new(nat).make(n)
+		zz := new(nat).make(n+2)
+		zz.clear()
 
+		print("n:");println(n)
 		print("x: ");println(test.x)
 		print("y: ");println(test.y)
 
-		c := fios(zz,x,y[0],m,k0)
-		fmt.Printf("zz: %s\n c: %d \n",zz.utoa(16),c)
+		var c Word
+		for i := 0; i < n; i++ {
+			c = fios(zz, x, y[i], m, k0)
+		}
+		fmt.Printf("zz: %s\n c: 0x%x \n",zz.utoa(16),c)
 
 
 /// My Main
