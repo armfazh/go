@@ -494,27 +494,27 @@ func TestMontgomery1024(t *testing.T) {
 			t.Errorf("#%d: k0 in table=%#x, computed=%#x\n", i, test.k0, k0)
 		}
 
-/// My Main
-		println("===== START MAIN")
-		n := len(m)
-		zz := new(nat).make(n+2)
-		zz.clear()
+		if false {
+			/// My Main
+			println("===== START MAIN")
+			n := len(m)
+			zz := new(nat).make(n + 2)
+			zz.clear()
 
-		print("n:");println(n)
-		print("x: ");println(test.x)
-		print("y: ");println(test.y)
+			print("n:");println(n)
+			print("x: ");println(test.x)
+			print("y: ");println(test.y)
 
-		var c Word
-		for i := 0; i < n; i++ {
-			c = fios(zz, x, y[i], m, k0)
+			for i := 0; i < n; i++ {
+				fios(zz, x, y[i], m, k0)
+			}
+			fmt.Printf("zz: %s\n c: 0x%x \n", zz.utoa(16), zz[n])
+
+			/// My Main
+			println("===== EOF MAIN")
 		}
-		fmt.Printf("zz: %s\n c: 0x%x \n",zz.utoa(16),c)
-
-
-/// My Main
-	println("===== EOF MAIN")
 		// check montgomery with correct k0 produces correct output
-		z := nat(nil).montgomery1024(x, y, m, k0, len(m))
+		z := nat(nil).montgomery(x, y, m, k0, len(m))
 		z = z.norm()
 		if z.cmp(out) != 0 {
 			t.Errorf("#%d: got 0x%s want 0x%s", i, z.utoa(16), out.utoa(16))
@@ -541,29 +541,6 @@ func BenchmarkMontgomery(b *testing.B) {
 		})
 	}
 }
-
-func BenchmarkMontgomery1024(b *testing.B) {
-	for _, n := range benchSizes {
-		if isRaceBuilder && n > 1e3 {
-			continue
-		}
-		if n!=16{
-			continue
-		}
-		x := rndV(n)
-		y := rndV(n)
-		m := rndV(n)
-		k0 := rndW()
-		z := make([]Word, n)
-		b.Run(fmt.Sprint(n), func(b *testing.B) {
-			b.SetBytes(int64(n * _W))
-			for i := 0; i < b.N; i++ {
-				z = nat(nil).montgomery1024(x, y, m, k0, len(m))
-			}
-		})
-	}
-}
-
 
 var expNNTests = []struct {
 	x, y, m string

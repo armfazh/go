@@ -376,86 +376,85 @@ E5:	CMPQ BX, R11		// i < n
 	RET
 
 
-//func fios(z, x []Word, y Word, m []Word, k Word) (c Word)
+//func fios(z, x []Word, y Word, m []Word, k Word)
 TEXT ·fios(SB),NOSPLIT,$0
     MOVQ z+0(FP), R10
-	MOVQ x+24(FP), R8
-	MOVQ x_len+32(FP), R11
-	MOVQ y+48(FP), R9
+    MOVQ x+24(FP), R8
+    MOVQ y+48(FP), R9
     MOVQ m+56(FP), R13
     MOVQ k+80(FP), R14
-	MOVQ $0, BX		// i = 0
-	MOVQ $0, CX		// c = 0
+    MOVQ $0, BX		// i = 0
 
-	//unroll first iteration
-	// (C,S) := t[0] + a[0]*b[i]
+    //unroll first iteration
+    // (C,S) := t[0] + a[0]*b[i]
     MOVQ (R8)(BX*8), AX
     MULQ R9
     ADDQ (R10)(BX*8), AX
     ADCQ $0, DX
-    // ADD(t[1],C)
-    ADDQ DX, (8)(R10)(BX*8)
-    ADCQ $0, (16)(R10)(BX*8)
-
     // DX = S
-	// CX = S
-    MOVQ AX, CX
+    // CX = S
+    MOVQ AX, R12
     MOVQ AX, R15
+    // ADD(t[1],C)
+    XORQ R11,R11
+    ADDQ (8)(R10)(BX*8), DX
+    ADCQ (16)(R10)(BX*8), R11
+    MOVQ DX, (8)(R10)(BX*8)
+    MOVQ R11, (16)(R10)(BX*8)
+
     // m := S*n'[0] mod W
     // Cx = m = S * k
-    IMULQ R14, CX
+    IMULQ R12, R14
 
     // (C,S) := S + m*n[0]
     MOVQ (R13)(BX*8), AX
-    MULQ CX
+    MULQ R14
     ADDQ R15, AX
     ADCQ $0, DX
-
-	MOVQ CX, R15
-	MOVQ DX, CX
-
+    MOVQ DX, CX
     ADDQ $1, BX		// i++
 
+    MOVQ    (R10)(BX*8), R11
+    MOVQ (8)(R10)(BX*8), R12
 
 L6:
     // (C,S) := t[j] + a[j]*b[i] + C
     MOVQ (R8)(BX*8), AX
-	MULQ R9
-	ADDQ CX, AX
-	ADCQ $0, DX
-	ADDQ (R10)(BX*8), AX
-	ADCQ $0, DX
-	MOVQ AX, CX
+    MULQ R9
+    ADDQ CX, AX
+    ADCQ $0, DX
+    ADDQ R11, AX
+    ADCQ $0, DX
+    MOVQ AX, CX
     // ADD(t[j+1],C)
-    XORQ AX, AX
-    ADDQ (8)(R10)(BX*8), DX
-    ADCQ (16)(R10)(BX*8), AX
-    MOVQ DX, (8)(R10)(BX*8)
-    MOVQ AX, (16)(R10)(BX*8)
+    XORQ R15, R15
+    ADDQ R12, DX
+    ADCQ (16)(R10)(BX*8), R15
+    MOVQ DX, R11
+    MOVQ R15, R12
     // (C,S) := S + m*n[j]
     MOVQ (R13)(BX*8), AX
-	MULQ R15
-	ADDQ CX, AX
-	ADCQ $0, DX
+    MULQ R14
+    ADDQ CX, AX
+    ADCQ $0, DX
     // Z[j-1] = S
-	MOVQ DX, CX
+    MOVQ DX, CX
     MOVQ AX, (-8)(R10)(BX*8)
-	ADDQ $1, BX		// i++
+    ADDQ $1, BX		// i++
 
-E6:	CMPQ BX, R11		// i < n
-	JL L6
+E6:	CMPQ BX, $16		// i < n
+    JL L6
     // (C,S) := t[s] + C
     // t[s-1] := S
     // t[s] := t[s+1] + C
     // t[s+1] := 0
     XORQ AX, AX
-    ADDQ    (R10)(BX*8), CX
+    ADDQ R11, CX
     MOVQ CX, (-8)(R10)(BX*8)
     ADCQ (8)(R10)(BX*8), AX
     MOVQ AX, (R10)(BX*8)
-    //MOVQ $0, (8)(R10)(BX*8)
+    MOVQ $0, (8)(R10)(BX*8)
 
-	MOVQ AX, c+88(FP)
 	RET
 
 //func addMulVVW_opt(z, x []Word, y Word) (c Word)
