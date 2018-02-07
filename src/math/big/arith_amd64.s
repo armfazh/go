@@ -751,7 +751,25 @@ A61:
     MOVQ DX, CX
     MOVQ AX, (8)(R10)(BX*8)
 
-    ADDQ $2, BX
+    MOVQ (16)(R8)(BX*8), AX
+    MULQ R9
+    ADDQ (16)(R10)(BX*8), AX
+    ADCQ $0, DX
+    ADDQ CX, AX
+    ADCQ $0, DX
+    MOVQ DX, CX
+    MOVQ AX, (16)(R10)(BX*8)
+
+    MOVQ (24)(R8)(BX*8), AX
+    MULQ R9
+    ADDQ (24)(R10)(BX*8), AX
+    ADCQ $0, DX
+    ADDQ CX, AX
+    ADCQ $0, DX
+    MOVQ DX, CX
+    MOVQ AX, (24)(R10)(BX*8)
+
+    ADDQ $4, BX
     CMPQ BX, $16
     JL A61
 
