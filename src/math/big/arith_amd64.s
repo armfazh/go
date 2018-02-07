@@ -683,7 +683,7 @@ TEXT ·fios(SB),NOSPLIT,$0
     MOVQ    (R10)(BX*8), R11
     MOVQ (8)(R10)(BX*8), R12
 
-L6:
+L66:
     // (C,S) := t[j] + a[j]*b[i] + C
     MOVQ (R8)(BX*8), AX
     MULQ R9
@@ -708,8 +708,9 @@ L6:
     MOVQ AX, (-8)(R10)(BX*8)
     ADDQ $1, BX		// i++
 
-E6:	CMPQ BX, $16		// i < n
-    JL L6
+E66:
+	CMPQ BX, $16		// i < n
+    JL L66
     // (C,S) := t[s] + C
     // t[s-1] := S
     // t[s] := t[s+1] + C
@@ -756,8 +757,9 @@ A61:
 
 E61:
     XORQ DX, DX
-	ADDQ CX, (R10)(BX*8)
+	ADDQ (R10)(BX*8), CX
 	ADCQ (8)(R10)(BX*8), DX
+	MOVQ CX,  (R10)(BX*8)
 	MOVQ DX, (8)(R10)(BX*8)
 
 	MOVQ DX, c+56(FP)
