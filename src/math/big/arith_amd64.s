@@ -376,6 +376,215 @@ E5:	CMPQ BX, R11		// i < n
 	RET
 
 
+
+// mul512_red(z, m []Word, k0 Word)
+TEXT ·mul512_red(SB),NOSPLIT,$0
+    MOVQ z+0(FP),  DI
+    MOVQ x+24(FP), SI
+    //MOVQ y+48(FP), BX
+
+    MOVQ (DI), R8
+    MOVQ (8)(DI), R9
+    MOVQ (16)(DI), R10
+    MOVQ (24)(DI), R11
+    MOVQ (32)(DI), R12
+    MOVQ (40)(DI), R13
+    MOVQ (48)(DI), R14
+    MOVQ (56)(DI), R15
+
+    MOVQ $0, CX
+
+L_ite2:
+    MOVQ (DI)(CX*8), AX // ti
+    MOVQ y+48(FP), BX // k0
+    IMULQ AX, BX
+
+    MOVQ (SI), AX
+    MULQ BX
+    ADDQ AX, R8
+    MOVQ R8, (DI)(CX*8)
+    MOVQ DX, R8
+    ADCQ $0, R8
+
+    MOVQ (8)(SI), AX
+    MULQ BX
+    ADDQ AX, R9
+    ADCQ $0, DX
+    ADDQ R9, R8
+    MOVQ DX, R9
+    ADCQ $0, R9
+
+    MOVQ (16)(SI), AX
+    MULQ BX
+    ADDQ AX, R10
+    ADCQ $0, DX
+    ADDQ R10, R9
+    MOVQ DX, R10
+    ADCQ $0, R10
+
+    MOVQ (24)(SI), AX
+    MULQ BX
+    ADDQ AX, R11
+    ADCQ $0, DX
+    ADDQ R11, R10
+    MOVQ DX, R11
+    ADCQ $0, R11
+
+    MOVQ (32)(SI), AX
+    MULQ BX
+    ADDQ AX, R12
+    ADCQ $0, DX
+    ADDQ R12, R11
+    MOVQ DX, R12
+    ADCQ $0, R12
+
+    MOVQ (40)(SI), AX
+    MULQ BX
+    ADDQ AX, R13
+    ADCQ $0, DX
+    ADDQ R13, R12
+    MOVQ DX, R13
+    ADCQ $0, R13
+
+    MOVQ (48)(SI), AX
+    MULQ BX
+    ADDQ AX, R14
+    ADCQ $0, DX
+    ADDQ R14, R13
+    MOVQ DX, R14
+    ADCQ $0, R14
+
+    MOVQ (56)(SI), AX
+    MULQ BX
+    ADDQ AX, R15
+    ADCQ $0, DX
+    ADDQ R15, R14
+    MOVQ DX, R15
+    ADCQ $0, R15
+
+    MOVQ (64)(SI), AX
+    MULQ BX
+    ADDQ (64)(DI)(CX*8), AX
+    ADCQ (72)(DI)(CX*8), DX
+    //ADDQ R15, AX
+    //ADCQ $0, DX
+    MOVQ AX, (64)(DI)(CX*8)
+    MOVQ DX, (72)(DI)(CX*8)
+
+    ADDQ $1, CX
+    CMPQ CX, $1
+    JL L_ite2
+
+   MOVQ R8,  (0)(DI)(CX*8)
+   MOVQ R9,  (8)(DI)(CX*8)
+   MOVQ R10, (16)(DI)(CX*8)
+   MOVQ R11, (24)(DI)(CX*8)
+   MOVQ R12, (32)(DI)(CX*8)
+   MOVQ R13, (40)(DI)(CX*8)
+   //MOVQ R14, (48)(DI)(CX*8)
+   //MOVQ R15, (56)(DI)(CX*8)
+
+    RET
+
+//func mul512x1024(z, x, y []Word) (c Word)
+TEXT ·mul512x1024(SB),NOSPLIT,$0
+    MOVQ z+0(FP),  DI
+    MOVQ x+24(FP), SI
+    //MOVQ y+48(FP), BX
+
+    MOVQ (DI), R8
+    MOVQ (8)(DI), R9
+    MOVQ (16)(DI), R10
+    MOVQ (24)(DI), R11
+    MOVQ (32)(DI), R12
+    MOVQ (40)(DI), R13
+    MOVQ (48)(DI), R14
+    MOVQ (56)(DI), R15
+
+    MOVQ $0, CX
+
+L_ite:
+    MOVQ y+48(FP), BX
+    MOVQ (BX)(CX*8), BX
+
+    MOVQ (SI), AX
+    MULQ BX
+    ADDQ AX, R8
+    MOVQ R8, (DI)(CX*8)
+    MOVQ DX, R8
+    ADCQ $0, R8
+
+    MOVQ (8)(SI), AX
+    MULQ BX
+    ADDQ AX, R9
+    ADCQ $0, DX
+    ADDQ R9, R8
+    MOVQ DX, R9
+    ADCQ $0, R9
+
+    MOVQ (16)(SI), AX
+    MULQ BX
+    ADDQ AX, R10
+    ADCQ $0, DX
+    ADDQ R10, R9
+    MOVQ DX, R10
+    ADCQ $0, R10
+
+    MOVQ (24)(SI), AX
+    MULQ BX
+    ADDQ AX, R11
+    ADCQ $0, DX
+    ADDQ R11, R10
+    MOVQ DX, R11
+    ADCQ $0, R11
+
+    MOVQ (32)(SI), AX
+    MULQ BX
+    ADDQ AX, R12
+    ADCQ $0, DX
+    ADDQ R12, R11
+    MOVQ DX, R12
+    ADCQ $0, R12
+
+    MOVQ (40)(SI), AX
+    MULQ BX
+    ADDQ AX, R13
+    ADCQ $0, DX
+    ADDQ R13, R12
+    MOVQ DX, R13
+    ADCQ $0, R13
+
+    MOVQ (48)(SI), AX
+    MULQ BX
+    ADDQ AX, R14
+    ADCQ $0, DX
+    ADDQ R14, R13
+    MOVQ DX, R14
+    ADCQ $0, R14
+
+    MOVQ (56)(SI), AX
+    MULQ BX
+    ADDQ AX, R15
+    ADCQ $0, DX
+    ADDQ R15, R14
+    MOVQ DX, R15
+    ADCQ (64)(DI)(CX*8), R15
+
+    ADDQ $1, CX
+    CMPQ CX, $16
+    JL L_ite
+
+    ADDQ R8,  (0)(DI)(CX*8)
+    ADCQ R9,  (8)(DI)(CX*8)
+    ADCQ R10, (16)(DI)(CX*8)
+    ADCQ R11, (24)(DI)(CX*8)
+    ADCQ R12, (32)(DI)(CX*8)
+    ADCQ R13, (40)(DI)(CX*8)
+    ADCQ R14, (48)(DI)(CX*8)
+    ADCQ R15, (56)(DI)(CX*8)
+
+    RET
+
 //func fios(z, x []Word, y Word, m []Word, k Word)
 TEXT ·fios(SB),NOSPLIT,$0
     MOVQ z+0(FP), R10

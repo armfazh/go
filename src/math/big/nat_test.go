@@ -494,20 +494,25 @@ func TestMontgomery1024(t *testing.T) {
 			t.Errorf("#%d: k0 in table=%#x, computed=%#x\n", i, test.k0, k0)
 		}
 
-		if false {
+		if true {
 			/// My Main
 			println("===== START MAIN")
 			n := len(m)
-			zz := new(nat).make(n + 2)
+			zz := new(nat).make(2*n)
 			zz.clear()
 
 			print("n:");println(n)
 			print("x: ");println(test.x)
 			print("y: ");println(test.y)
+			print("m: ");println(test.m)
 
-			for i := 0; i < n; i++ {
-				fios(zz, x, y[i], m, k0)
-			}
+			mul512x1024(zz[:], x[:8], y)
+			mul512x1024(zz[8:], x[8:], y)
+			fmt.Printf("zz: %s\n c: 0x%x \n", zz.utoa(16), zz[n])
+
+
+			k0 := Word(0x20bd33babeb44649)
+			mul512_red(zz[:], m[:8], k0)
 			fmt.Printf("zz: %s\n c: 0x%x \n", zz.utoa(16), zz[n])
 
 			/// My Main

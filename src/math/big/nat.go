@@ -211,9 +211,17 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	if n == 16 {
 		z = z.make(n + 2)
 		z.clear()
-		for i := 0; i < n; i++ {
-			fios(z, x, y[i], m, k)
-		}
+		//for i := 0; i < n; i++ {
+		//	fios(z, x, y[i], m, k)
+
+		mul512x1024(z[:], x[:8], y)
+		mul512x1024(z[8:], x[8:], y)
+
+		mul512_red(z[:], m[:8], k)
+		mul512_red(z[8:], m[8:], k)
+		mul512_red(z[8:], m[:8], k)
+		mul512_red(z[16:], m[8:], k)
+
 		c = z[n]
 		z = z[:n]
 	} else {
@@ -1104,6 +1112,34 @@ func (z nat) expNNWindowed(x, y, m nat) nat {
 	return z.norm()
 }
 
+func (z nat) constantTimeConditionalCopy(bit int, x nat) nat {
+	if len(z) != len(x) {
+		panic("error on constantTimeSelect: size of inputs differs")
+	}
+	var vX Word
+	vX = Word(1 - bit)
+	for i := 0; i < len(x); i++ {
+		z[i] = (z[i] &^ vX) | (x[i] & vX)
+	}
+	return z
+}
+
+// queryTable_cte retrives from the table the element on index i
+// An entire scan of the table is required to avoid memory accesses
+// depending on secret values.
+func (z nat) queryTable_cte(table []nat, index Word) nat {
+	for i, entry := range table {
+		var bit int = 0
+		if index == Word(i) {
+			bit = 1
+		}
+		println("index", index)
+		println("bit", bit)
+		z.constantTimeConditionalCopy(bit, entry)
+	}
+	return z
+}
+
 // expNNMontgomery calculates x**y mod m using a fixed, 4-bit window.
 // Uses Montgomery representation.
 func (z nat) expNNMontgomery(x, y, m nat) nat {
@@ -1159,6 +1195,7 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 	copy(z, powers[0])
 
 	zz = zz.make(numWords)
+	//yy := make(nat, numWords)
 
 	// same windowed exponent, but with Montgomery multiplications
 	for i := len(y) - 1; i >= 0; i-- {
@@ -1170,6 +1207,8 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 				zz = zz.montgomery(z, z, m, k0, numWords)
 				z = z.montgomery(zz, zz, m, k0, numWords)
 			}
+			//yy = yy.queryTable_cte(powers[:], yi>>(_W-n))
+			//zz = zz.montgomery(z, yy, m, k0, numWords)
 			zz = zz.montgomery(z, powers[yi>>(_W-n)], m, k0, numWords)
 			z, zz = zz, z
 			yi <<= n
