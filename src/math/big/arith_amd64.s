@@ -466,10 +466,66 @@ L_ite2:
     MULQ BX
     ADDQ (64)(DI)(CX*8), AX
     ADCQ (72)(DI)(CX*8), DX
-    //ADDQ R15, AX
-    //ADCQ $0, DX
+    ADDQ R15, AX
+    ADCQ $0, DX
     MOVQ AX, (64)(DI)(CX*8)
     MOVQ DX, (72)(DI)(CX*8)
+
+    MOVQ (72)(SI), AX
+    MULQ BX
+    ADDQ (72)(DI)(CX*8), AX
+    ADCQ (80)(DI)(CX*8), DX
+    ADCQ $0, (88)(DI)(CX*8)
+    MOVQ AX, (72)(DI)(CX*8)
+    MOVQ DX, (80)(DI)(CX*8)
+
+    MOVQ (80)(SI), AX
+    MULQ BX
+    ADDQ (80)(DI)(CX*8), AX
+    ADCQ (88)(DI)(CX*8), DX
+    ADCQ $0, (96)(DI)(CX*8)
+    MOVQ AX, (80)(DI)(CX*8)
+    MOVQ DX, (88)(DI)(CX*8)
+
+    MOVQ (88)(SI), AX
+    MULQ BX
+    ADDQ (88)(DI)(CX*8), AX
+    ADCQ (96)(DI)(CX*8), DX
+    ADCQ $0, (104)(DI)(CX*8)
+    MOVQ AX, (88)(DI)(CX*8)
+    MOVQ DX, (96)(DI)(CX*8)
+
+    MOVQ (96)(SI), AX
+    MULQ BX
+    ADDQ (96)(DI)(CX*8), AX
+    ADCQ (104)(DI)(CX*8), DX
+    ADCQ $0, (112)(DI)(CX*8)
+    MOVQ AX, (96)(DI)(CX*8)
+    MOVQ DX, (104)(DI)(CX*8)
+
+    MOVQ (104)(SI), AX
+    MULQ BX
+    ADDQ (104)(DI)(CX*8), AX
+    ADCQ (112)(DI)(CX*8), DX
+    ADCQ $0, (120)(DI)(CX*8)
+    MOVQ AX, (104)(DI)(CX*8)
+    MOVQ DX, (112)(DI)(CX*8)
+
+    MOVQ (112)(SI), AX
+    MULQ BX
+    ADDQ (112)(DI)(CX*8), AX
+    ADCQ (120)(DI)(CX*8), DX
+    ADCQ $0, (128)(DI)(CX*8)
+    MOVQ AX, (112)(DI)(CX*8)
+    MOVQ DX, (120)(DI)(CX*8)
+
+    MOVQ (120)(SI), AX
+    MULQ BX
+    ADDQ (120)(DI)(CX*8), AX
+    ADCQ (128)(DI)(CX*8), DX
+    ADCQ $0, (136)(DI)(CX*8)
+    MOVQ AX, (120)(DI)(CX*8)
+    MOVQ DX, (128)(DI)(CX*8)
 
     ADDQ $1, CX
     CMPQ CX, $1
@@ -481,7 +537,7 @@ L_ite2:
    MOVQ R11, (24)(DI)(CX*8)
    MOVQ R12, (32)(DI)(CX*8)
    MOVQ R13, (40)(DI)(CX*8)
-   //MOVQ R14, (48)(DI)(CX*8)
+   MOVQ R14, (48)(DI)(CX*8)
    //MOVQ R15, (56)(DI)(CX*8)
 
     RET

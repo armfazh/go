@@ -217,10 +217,7 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 		mul512x1024(z[:], x[:8], y)
 		mul512x1024(z[8:], x[8:], y)
 
-		mul512_red(z[:], m[:8], k)
-		mul512_red(z[8:], m[8:], k)
-		mul512_red(z[8:], m[:8], k)
-		mul512_red(z[16:], m[8:], k)
+		mul512_red(z, m, k)
 
 		c = z[n]
 		z = z[:n]
