@@ -528,7 +528,7 @@ L_ite2:
     MOVQ DX, (128)(DI)(CX*8)
 
     ADDQ $1, CX
-    CMPQ CX, $1
+    CMPQ CX, $16
     JL L_ite2
 
    MOVQ R8,  (0)(DI)(CX*8)
@@ -625,6 +625,7 @@ L_ite:
     ADDQ R15, R14
     MOVQ DX, R15
     ADCQ (64)(DI)(CX*8), R15
+    ADCQ $0, (72)(DI)(CX*8)
 
     ADDQ $1, CX
     CMPQ CX, $16
@@ -722,44 +723,45 @@ E6:	CMPQ BX, $16		// i < n
 
 	RET
 
-//func addMulVVW_opt(z, x []Word, y Word) (c Word)
-TEXT ·addMulVVW_opt(SB),NOSPLIT,$0
-    MOVQ z+0(FP), R10
+// func addMul(z, x []Word, y Word) (c Word)
+TEXT ·addMul(SB),NOSPLIT,$0
+	MOVQ z+0(FP), R10
 	MOVQ x+24(FP), R8
 	MOVQ y+48(FP), R9
-	MOVQ z_len+8(FP), R11
 	MOVQ $0, BX		// i = 0
 	MOVQ $0, CX		// c = 0
 
-	MOVQ R11, R12
-	//unroll first ite
+A61:
     MOVQ (R8)(BX*8), AX
-    MULQ R9               // DA = x[0]*y
+    MULQ R9
     ADDQ (R10)(BX*8), AX
+    ADCQ $0, DX
+    ADDQ CX, AX
     ADCQ $0, DX
     MOVQ DX, CX
     MOVQ AX, (R10)(BX*8)
 
-    ADDQ $1, BX		// i++
+    MOVQ (8)(R8)(BX*8), AX
+    MULQ R9
+    ADDQ (8)(R10)(BX*8), AX
+    ADCQ $0, DX
+    ADDQ CX, AX
+    ADCQ $0, DX
+    MOVQ DX, CX
+    MOVQ AX, (8)(R10)(BX*8)
 
-L6:	MOVQ (R8)(BX*8), AX
-	MULQ R9
-	ADDQ (R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
-	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (R10)(BX*8)
+    ADDQ $2, BX
+    CMPQ BX, $16
+    JL A61
 
-	ADDQ $1, BX		// i++
+E61:
+    XORQ DX, DX
+	ADDQ CX, (R10)(BX*8)
+	ADCQ (8)(R10)(BX*8), DX
+	MOVQ DX, (8)(R10)(BX*8)
 
-
-E6:	CMPQ BX, R11		// i < n
-	JL L6
-
-	MOVQ CX, c+56(FP)
+	MOVQ DX, c+56(FP)
 	RET
-
 
 // func addMulVVW(z, x []Word, y Word) (c Word)
 TEXT ·addMulVVW(SB),NOSPLIT,$0

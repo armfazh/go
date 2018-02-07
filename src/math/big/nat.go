@@ -209,18 +209,17 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	}
 	var c Word
 	if n == 16 {
-		z = z.make(n + 2)
+		z = z.make(2*n + 1)
 		z.clear()
-		//for i := 0; i < n; i++ {
-		//	fios(z, x, y[i], m, k)
 
 		mul512x1024(z[:], x[:8], y)
 		mul512x1024(z[8:], x[8:], y)
 
-		mul512_red(z, m, k)
-
-		c = z[n]
-		z = z[:n]
+		for i := 0; i < n; i++ {
+			t := z[i] * k
+			c = addMul(z[i:], m, t)
+		}
+		z = z[n : 2*n]
 	} else {
 		z = z.make(n)
 		z.clear()
@@ -1192,7 +1191,6 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 	copy(z, powers[0])
 
 	zz = zz.make(numWords)
-	//yy := make(nat, numWords)
 
 	// same windowed exponent, but with Montgomery multiplications
 	for i := len(y) - 1; i >= 0; i-- {
@@ -1204,8 +1202,6 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 				zz = zz.montgomery(z, z, m, k0, numWords)
 				z = z.montgomery(zz, zz, m, k0, numWords)
 			}
-			//yy = yy.queryTable_cte(powers[:], yi>>(_W-n))
-			//zz = zz.montgomery(z, yy, m, k0, numWords)
 			zz = zz.montgomery(z, powers[yi>>(_W-n)], m, k0, numWords)
 			z, zz = zz, z
 			yi <<= n
