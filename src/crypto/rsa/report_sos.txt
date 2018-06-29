@@ -1,0 +1,4 @@
+benchmark                           old ns/op     new ns/op     delta
+BenchmarkRSA2048Decrypt-4           2135289       1740752       -18.48%
+BenchmarkRSA2048Sign-4              2507508       2186968       -12.78%
+Benchmark3PrimeRSA2048Decrypt-4     1221159       1248227       +2.22%

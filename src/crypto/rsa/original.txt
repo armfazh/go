@@ -1,0 +1,8 @@
+goos: linux
+goarch: amd64
+pkg: crypto/rsa
+BenchmarkRSA2048Decrypt-4         	     500	   2135289 ns/op
+BenchmarkRSA2048Sign-4            	     500	   2507508 ns/op
+Benchmark3PrimeRSA2048Decrypt-4   	    1000	   1221159 ns/op
+PASS
+ok  	crypto/rsa	4.204s
