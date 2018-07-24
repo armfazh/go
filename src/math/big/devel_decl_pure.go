@@ -3,7 +3,12 @@
 
 package big
 
-func addMulVVWunrolled(z, x []Word, y Word) (c Word) {
+func addMulVVW_unrolled(z, x []Word, y Word) (c Word) {
+	var zz Word
+	zz = 312
+	return zz
+}
+func mul512(z, x []Word, y Word) (c Word) {
 	var zz Word
 	zz = 312
 	return zz
