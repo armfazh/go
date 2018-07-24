@@ -2,8 +2,8 @@
 
 #include "textflag.h"
 
-// func addMulVVW_unrolled(z, x []Word, y Word) (c Word)
-TEXT ·addMulVVW_unrolled(SB),NOSPLIT,$0
+// func addMulVVWunrolled(z, x []Word, y Word) (c Word)
+TEXT ·addMulVVWunrolled(SB),NOSPLIT,$0
 	MOVQ z+0(FP), R10
 	MOVQ x+24(FP), R8
 	MOVQ y+48(FP), R9

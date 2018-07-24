@@ -19,6 +19,3 @@ func mulAddVWW(z, x []Word, y, r Word) (c Word)
 func addMulVVW(z, x []Word, y Word) (c Word)
 func divWVW(z []Word, xn Word, x []Word, y Word) (r Word)
 
-// Devel functions
-func addMulVVW_unrolled(z, x []Word, y Word) (c Word)
-func mul512x1024(z, x, y []Word) (c Word)

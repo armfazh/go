@@ -24,7 +24,7 @@ func BenchmarkFazMontgomery(b *testing.B) {
 		z.montgomery(mulx, muly, mod, k, n)
 	}
 }
-
+/*
 func BenchmarkFazMul512(b *testing.B) {
 	
 	mulx := natFromString("0x2acb12106b44f6632bef94318715f512852b73a92340543c1b72899ebc7ac24816c39c7b1d67528d8a3927ef14a22434bbac41e6731f52ee8f0e425b9df0cc7122f85255696e7019d5f88d062b1c356fb09757f6b2c8ea38f4bff44f757afe8bac0d2e7e0b946169b349eb4178309597f7b537ef4015bb61ac229d29c94a7734")
@@ -40,7 +40,7 @@ func BenchmarkFazMul512(b *testing.B) {
 		//z.montgomery(mulx, muly, mod, k, n)
 		mul512x1024(z[:], mulx[:8], muly)
 	}
-}
+}*/
 
 func BenchmarkFazAddMulVVW_unrolled(b *testing.B) {
 //	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
@@ -53,7 +53,7 @@ func BenchmarkFazAddMulVVW_unrolled(b *testing.B) {
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {
-				addMulVVW_unrolled(z, x, y)
+				addMulVVWunrolled(z, x, y)
 			}
 		})
 	}
