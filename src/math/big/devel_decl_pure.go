@@ -9,7 +9,7 @@ func addMulVVW_unrolled(z, x []Word, y Word) (c Word) {
 	return zz
 }
 
-func intmadd512x512(z, x, y []Word)  {
+func intmadd512xN(z, x, y []Word)  {
 	z[0] = x[0] + y[0]
 	return 
 }

@@ -27,10 +27,9 @@ func intmult(z, x, y nat) {
 //	blocks := n/8
 //	remainder := n%8
 	
-	intmadd512x512(z[ 0:],x[0: 8],y[0: 8])
-	intmadd512x512(z[ 8:],x[8:16],y[0: 8])
-	intmadd512x512(z[ 8:],x[0: 8],y[8:16])
-	intmadd512x512(z[16:],x[8:16],y[8:16])
+	intmadd512xN(z,x[0:8],y)
+	intmadd512xN(z[8:],x[8:16],y)
+	
 //	for b := 0; b < 2; b++ {
 //		intmadd512xN(z[8*b:],x[8*b:8*b+8],y)
 //	}	
@@ -39,14 +38,13 @@ func intmult(z, x, y nat) {
 
 func test_intmult() {
 	x := natFromString("0x2acb12106b44f6632bef94318715f512852b73a92340543c1b72899ebc7ac24816c39c7b1d67528d8a3927ef14a22434bbac41e6731f52ee8f0e425b9df0cc7122f85255696e7019d5f88d062b1c356fb09757f6b2c8ea38f4bff44f757afe8bac0d2e7e0b946169b349eb4178309597f7b537ef4015bb61ac229d29c94a7734")
-	y := natFromString("0x6de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861def612c3877cf07")
+	y := natFromString("0x0732104832148325826538246381274832740126136532643265326de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861def612c3877cf07")
 	x.PrintHex()
 	y.PrintHex()
 
-	n := len(x)
-	z := nat(nil).make(2*n)
+	z := nat(nil).make(len(x)+len(y))
 	z.clear()	
-	fmt.Println(n)
+	fmt.Printf("lx: %d ly: %d\n",len(x),len(y))
 	intmult(z,x,y)
 	z.PrintHex()
 }

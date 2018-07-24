@@ -35,10 +35,8 @@ func BenchmarkFazMul512(b *testing.B) {
 	
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		intmadd512x512(z[ 0:],x[0: 8],y[0: 8])
-		intmadd512x512(z[ 8:],x[8:16],y[0: 8])
-		intmadd512x512(z[ 8:],x[0: 8],y[8:16])
-		intmadd512x512(z[16:],x[8:16],y[8:16])
+		intmadd512xN(z,x[0: 8],y)
+		intmadd512xN(z[8:],x[8:16],y)
 	}
 }
 

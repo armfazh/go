@@ -121,15 +121,17 @@ E6:	CMPQ BX, R11		// i < n
 	RET
 
 
-// func intmadd512x512(z, x, y []Word) 
-TEXT ·intmadd512x512(SB),NOSPLIT,$8
+// func intmadd512xN(z, x, y []Word) 
+TEXT ·intmadd512xN(SB),NOSPLIT,$24
 	// Push BP
 	MOVQ BP, -8(SP)
-
-	MOVQ z+0(FP), DI
+	//Save N=len(y) in -24SP
+ 	MOVQ y_len+56(FP), AX
+	MOVQ AX, -24(SP)
+	
+	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
 	MOVQ y+48(FP), BP
-	MOVQ $0, CX
 
 	MOVQ  0(DI), R8
 	MOVQ  8(DI), R9
@@ -139,7 +141,19 @@ TEXT ·intmadd512x512(SB),NOSPLIT,$8
 	MOVQ 40(DI), R13
 	MOVQ 48(DI), R14
 	MOVQ 56(DI), R15
-
+	
+L2:
+	MOVQ -24(SP), AX	
+	MOVQ $8, DX
+	CMPQ AX, DX
+	CMOVQLT AX, DX
+	CMPQ DX, $0
+	JE L_END
+	
+	SUBQ DX, AX
+	MOVQ AX, -24(SP)
+	MOVQ DX, -16(SP)
+	MOVQ $0, CX
 L1:
 	MOVQ (BP)(CX*8), BX
 	MOVQ (SI), AX
@@ -205,8 +219,9 @@ L1:
 	MOVQ DX, R15
 	ADCQ $0, R15
 	
+	MOVQ -16(SP), AX
 	ADDQ $1, CX
-	CMPQ CX, $8
+	CMPQ CX, AX
 	JL L1
 	
 	ADDQ  0(DI)(CX*8),  R8
@@ -218,15 +233,21 @@ L1:
 	ADCQ 48(DI)(CX*8), R14
 	ADCQ 56(DI)(CX*8), R15
 
-    MOVQ  R8,  0(DI)(CX*8)
-	MOVQ  R9,  8(DI)(CX*8)
-	MOVQ R10, 16(DI)(CX*8)
-	MOVQ R11, 24(DI)(CX*8)
-	MOVQ R12, 32(DI)(CX*8)
-	MOVQ R13, 40(DI)(CX*8)
-	MOVQ R14, 48(DI)(CX*8)
-	MOVQ R15, 56(DI)(CX*8)
+	SHLQ $3, CX
+	ADDQ CX, BP
+	ADDQ CX, DI
+	JMP L2
 
+L_END:
+    MOVQ  R8,  0(DI)
+	MOVQ  R9,  8(DI)
+	MOVQ R10, 16(DI)
+	MOVQ R11, 24(DI)
+	MOVQ R12, 32(DI)
+	MOVQ R13, 40(DI)
+	MOVQ R14, 48(DI)
+	MOVQ R15, 56(DI)
+	
 	// Pop BP 
 	MOVQ -8(SP), BP
 	RET
