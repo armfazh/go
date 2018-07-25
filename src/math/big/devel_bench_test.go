@@ -30,13 +30,11 @@ func BenchmarkFazMul512(b *testing.B) {
 	y := natFromString("0x6de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861def612c3877cf07")
 
 	var z nat
-	n := len(x)
-	z = z.make(2 * n)
+	z = z.make(len(x)+len(y))
 	
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		intmadd512xN(z,x[0: 8],y)
-		intmadd512xN(z[8:],x[8:16],y)
+		intmadd512xN(z,x,y)
 	}
 }
 

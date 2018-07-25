@@ -122,15 +122,26 @@ E6:	CMPQ BX, R11		// i < n
 
 
 // func intmadd512xN(z, x, y []Word) 
-TEXT ·intmadd512xN(SB),NOSPLIT,$24
+TEXT ·intmadd512xN(SB),NOSPLIT,$40
 	// Push BP
 	MOVQ BP, -8(SP)
-	//Save N=len(y) in -24SP
- 	MOVQ y_len+56(FP), AX
-	MOVQ AX, -24(SP)
+	
+	//Save len(x) in -40SP
+ 	MOVQ x_len+32(FP), AX
+	MOVQ AX, -40(SP)
 	
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
+
+L_START_X:
+	MOVQ -40(SP), AX
+	CMPQ AX, $8
+	JLT L_X_SPECIAL
+	
+	//Save len(y) in -24SP
+ 	MOVQ y_len+56(FP), AX
+	MOVQ AX, -24(SP)
+	
 	MOVQ y+48(FP), BP
 
 	MOVQ  0(DI), R8
@@ -142,13 +153,13 @@ TEXT ·intmadd512xN(SB),NOSPLIT,$24
 	MOVQ 48(DI), R14
 	MOVQ 56(DI), R15
 	
-L2:
+L_START_Y:
 	MOVQ -24(SP), AX	
 	MOVQ $8, DX
 	CMPQ AX, DX
 	CMOVQLT AX, DX
 	CMPQ DX, $0
-	JE L_END
+	JE L_END_Y
 	
 	SUBQ DX, AX
 	MOVQ AX, -24(SP)
@@ -236,9 +247,9 @@ L1:
 	SHLQ $3, CX
 	ADDQ CX, BP
 	ADDQ CX, DI
-	JMP L2
+	JMP L_START_Y
 
-L_END:
+L_END_Y:
     MOVQ  R8,  0(DI)
 	MOVQ  R9,  8(DI)
 	MOVQ R10, 16(DI)
@@ -247,7 +258,23 @@ L_END:
 	MOVQ R13, 40(DI)
 	MOVQ R14, 48(DI)
 	MOVQ R15, 56(DI)
+
+L_END_X:
+	MOVQ -40(SP), AX
+	SUBQ $8, AX
+	MOVQ AX, -40(SP)
+	MOVQ x_len+32(FP), CX
+	SUBQ AX, CX
+	SHLQ $3, CX
+	MOVQ z+0(FP), DI
+	ADDQ CX, DI
+	ADDQ $64, SI	
+	JMP L_START_X
 	
+L_X_SPECIAL:
+
+
+L_END:
 	// Pop BP 
 	MOVQ -8(SP), BP
 	RET
