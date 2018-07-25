@@ -5,11 +5,10 @@
 package big
 
 import (
-//	"fmt"
+	//	"fmt"
 	"testing"
-//	"testing/quick"
+	//	"testing/quick"
 )
-
 
 var devel_expTests = []struct {
 	x, y, m string
@@ -127,4 +126,3 @@ func TestFazExp(t *testing.T) {
 		}
 	}
 }
-

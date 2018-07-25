@@ -15,30 +15,30 @@ func natFromString2(s string) nat {
 
 func (x nat) PrintHex() {
 	fmt.Print("[")
-	for i:= range(x) {
-		fmt.Printf("0x%016x,",x[i])
+	for i := range x {
+		fmt.Printf("0x%016x,", x[i])
 	}
 	fmt.Println("]")
 }
 
 func intmult(z, x, y nat) {
-	
-//	n := len(y)
-//	blocks := n/8
-//	remainder := n%8
 
-//	zz := nat(nil).make(len(z))
-//	zz.clear()
-//	addmul64xN(zz,x[:16],y)
-//	zz.PrintHex()
+	//	n := len(y)
+	//	blocks := n/8
+	//	remainder := n%8
 
-	intmaddNxN(z,x,y[:1])
-	
-//	for i, v := range z { 
-//		if v != zz[i] { 
-//			fmt.Printf("[NoEqual]\n")
-//		} 
-//	}
+	//	zz := nat(nil).make(len(z))
+	//	zz.clear()
+	//	addmul64xN(zz,x[:16],y)
+	//	zz.PrintHex()
+
+	intmaddNxN(z, x, y)
+
+	//	for i, v := range z {
+	//		if v != zz[i] {
+	//			fmt.Printf("[NoEqual]\n")
+	//		}
+	//	}
 	return
 }
 
@@ -48,60 +48,58 @@ func test_intmult() {
 	x.PrintHex()
 	y.PrintHex()
 
-	z := nat(nil).make(len(x)+len(y))
-	z.clear()	
-	fmt.Printf("lx: %d ly: %d\n",len(x),len(y))
-	intmult(z,x,y)
+	z := nat(nil).make(len(x) + len(y))
+	z.clear()
+	fmt.Printf("lx: %d ly: %d\n", len(x), len(y))
+	intmult(z, x, y)
 	z.PrintHex()
 }
 
-func test_nat(){
-	
+func test_nat() {
+
 	x, _, _, err := nat(nil).scan(strings.NewReader("AABBCCDDEEFF11223344556677"), 16, false)
 	if err != nil {
 		panic(err)
 	}
-	
+
 	fmt.Printf("val: %x\n", x)
-	
-	var s uint 
+
+	var s uint
 	var z nat
 	s = 1024
 	m := len(x)
 	if m == 0 {
-		 
+
 		fmt.Printf("ret 0")
 	}
 	// m > 0
 	n := m + int(s/_W)
-	fmt.Printf("n: %x\n", n)	
+	fmt.Printf("n: %x\n", n)
 	z = z.make(n + 1)
 	fmt.Printf("z: %x\n", z)
 	z[n] = shlVU(z[n-m:n], x, s%_W)
-	
+
 	fmt.Printf("z: %x\n", z)
 	z[0 : n-m].clear()
 	fmt.Printf("z: %x\n", z)
 	y := z.norm()
-	fmt.Printf("y: %x cap: %v\n",y,cap(y))
+	fmt.Printf("y: %x cap: %v\n", y, cap(y))
 
-	
 	x, _, _, err = nat(nil).scan(strings.NewReader("AABBCCDDEEFF11223344556677"), 16, false)
 	if err != nil {
 		panic(err)
 	}
-	
-	
+
 	q := x.make(20)
-// var q nat
+	// var q nat
 	q.shl(x, s)
-	fmt.Printf("val: %x cap: %v\n", q,cap(q))
-	
+	fmt.Printf("val: %x cap: %v\n", q, cap(q))
+
 }
-	
+
 func (i Int) MasPruebas() {
-	
-//	test_nat()
+
+	//	test_nat()
 	test_intmult()
 
 }

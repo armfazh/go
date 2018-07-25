@@ -5,54 +5,126 @@ import (
 	"testing"
 )
 
-
 func BenchmarkFazMontgomery(b *testing.B) {
-	
-	mulx := natFromString("0x2acb12106b44f6632bef94318715f512852b73a92340543c1b72899ebc7ac24816c39c7b1d67528d8a3927ef14a22434bbac41e6731f52ee8f0e425b9df0cc7122f85255696e7019d5f88d062b1c356fb09757f6b2c8ea38f4bff44f757afe8bac0d2e7e0b946169b349eb4178309597f7b537ef4015bb61ac229d29c94a7734")
-	muly := natFromString("0x6de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861def612c3877cf07")
-	mod  := natFromString("0x15cec62c593e3bd389f348ebae6e4ccf10d18d54003fe946b35f3fe539b10e8b850e911e18a3bd1e55d3f999ef33e3f89c021bcb8655e377ba5d95187b45e727d3a088049649154304c8e8bcf5668ff8928c95f4284706d1dd0e7ce45feb07e0d27fa84e27acf16d87ac58043815bce11b892feb929ee887e5ed0de22b92a375")
-
-	var z nat
-	n := len(mulx)
-	z = z.make(2 * n)
-
+	var benchSizes = []int{8, 16, 32, 64}
 	var k Word
 	k = (1 << 64) - 1
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		z.montgomery(mulx, muly, mod, k, n)
+	for _, n := range benchSizes {
+		mulx := rndV(n)
+		muly := rndV(n)
+		mod := rndV(n)
+		z := nat(nil).make(len(mulx) + len(muly))
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				z.montgomery(mulx, muly, mod, k, n)
+			}
+		})
 	}
 }
 
-func BenchmarkFazMul512(b *testing.B) {
-	x := natFromString("0x2acb12106b44f6632bef94318715f512852b73a92340543c1b72899ebc7ac24816c39c7b1d67528d8a3927ef14a22434bbac41e6731f52ee8f0e425b9df0cc7122f85255696e7019d5f88d062b1c356fb09757f6b2c8ea38f4bff44f757afe8bac0d2e7e0b946169b349eb4178309597f7b537ef4015bb61ac229d29c94a7734")
-	y := natFromString("0x6de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861def612c3877cf07")
+func BenchmarkFazIntMul(b *testing.B) {
+	var benchSizes = []int{8, 16, 32, 64}
 
-	var z nat
-	z = z.make(len(x)+len(y))
-	
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		intmaddNxN(z,x,y)
+	for _, n := range benchSizes {
+		mulx := rndV(n)
+		muly := rndV(n)
+		z := nat(nil).make(len(mulx) + len(muly))
+		z.clear()
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				intmaddNxN(z, mulx, muly)
+			}
+		})
 	}
 }
 
-func BenchmarkFazMulSingle(b *testing.B) {
-	x := natFromString("0x2acb12106b44f6632bef94318715f512852b73a92340543c1b72899ebc7ac24816c39c7b1d67528d8a3927ef14a22434bbac41e6731f52ee8f0e425b9df0cc7122f85255696e7019d5f88d062b1c356fb09757f6b2c8ea38f4bff44f757afe8bac0d2e7e0b946169b349eb4178309597f7b537ef4015bb61ac229d29c94a7734")
-	y := natFromString("0x6de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861def612c3877cf07")
+func BenchmarkFazIntMulSingle(b *testing.B) {
+	var benchSizes = []int{8, 16, 32, 64}
 
-	var z nat
-	z = z.make(len(x)+len(y))
-	
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		addmulNxN(z,x,y)
+	for _, n := range benchSizes {
+		mulx := rndV(n)
+		muly := rndV(n)
+		z := nat(nil).make(len(mulx) + len(muly))
+		z.clear()
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				addmulNxN(z, mulx, muly)
+			}
+		})
+	}
+}
+
+func BenchmarkFazMul(b *testing.B) {
+	var benchSizes = []int{8, 16, 32, 64}
+
+	for _, n := range benchSizes {
+		mulx := rndV(n)
+		muly := rndV(n)
+		z := nat(nil).make(len(mulx) + len(muly))
+		z.clear()
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				z.mul(mulx, muly)
+			}
+		})
+	}
+}
+
+func BenchmarkFazbasicMul(b *testing.B) {
+	var benchSizes = []int{8, 16, 32, 64}
+
+	for _, n := range benchSizes {
+		mulx := rndV(n)
+		muly := rndV(n)
+		z := nat(nil).make(len(mulx) + len(muly))
+		z.clear()
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				basicMul(z, mulx, muly)
+			}
+		})
+	}
+}
+
+func BenchmarkFazSqr(b *testing.B) {
+	var benchSizes = []int{8, 16, 32, 64}
+
+	for _, n := range benchSizes {
+		mulx := rndV(n)
+		z := nat(nil).make(2 * len(mulx))
+		z.clear()
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				z.sqr(mulx)
+			}
+		})
+	}
+}
+
+func BenchmarkFazbasicSqr(b *testing.B) {
+	var benchSizes = []int{8, 16, 32, 64}
+
+	for _, n := range benchSizes {
+		mulx := rndV(n)
+		z := nat(nil).make(2 * len(mulx))
+		z.clear()
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				basicSqr(z, mulx)
+			}
+		})
 	}
 }
 
 func BenchmarkFazAddMulVVW_unrolled(b *testing.B) {
-//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
+	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
 	var benchSizes = []int{16}
 
 	for _, n := range benchSizes {
@@ -68,10 +140,8 @@ func BenchmarkFazAddMulVVW_unrolled(b *testing.B) {
 	}
 }
 
-
-
 func BenchmarkFazAddMulVVW(b *testing.B) {
-//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
+	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
 	var benchSizes = []int{16}
 
 	for _, n := range benchSizes {
@@ -87,59 +157,8 @@ func BenchmarkFazAddMulVVW(b *testing.B) {
 	}
 }
 
-func BenchmarkFazMul(b *testing.B) {
-	mulx := natFromString("0x2acb12106b44f6632bef94318715f512852b73a92340543c1b72899ebc7ac24816c39c7b1d67528d8a3927ef14a22434bbac41e6731f52ee8f0e425b9df0cc7122f85255696e7019d5f88d062b1c356fb09757f6b2c8ea38f4bff44f757afe8bac0d2e7e0b946169b349eb4178309597f7b537ef4015bb61ac229d29c94a7734")
-	muly := natFromString("0x6de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861def612c3877cf07")
-	
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		var z nat
-		z.mul(mulx, muly)
-	}
-}
-
-func BenchmarkFazbasicMul(b *testing.B) {
-	mulx := natFromString("0x2acb12106b44f6632bef94318715f512852b73a92340543c1b72899ebc7ac24816c39c7b1d67528d8a3927ef14a22434bbac41e6731f52ee8f0e425b9df0cc7122f85255696e7019d5f88d062b1c356fb09757f6b2c8ea38f4bff44f757afe8bac0d2e7e0b946169b349eb4178309597f7b537ef4015bb61ac229d29c94a7734")
-	muly := natFromString("0x6de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861def612c3877cf07")
-	
-	var z nat
-	n := len(mulx)
-	z = z.make(2 * n)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		basicMul(z, mulx, muly)
-	}
-}
-
-func BenchmarkFazSqr(b *testing.B) {
-	var mulx nat
-	mulx = natFromString("812057848953725743532498894375134890158458463578463856324783543381205784895372574353249889437513489015845846357846385632478354338120578489537257435324988943751348901584584635784638563247835433812057848953725743532498894375134890158458463578463856324783543381205784895372574353249889437513489015845846357846385632478354338120578489537257435324988943751348901584584635784638563247835433")
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		var z nat
-		z.sqr(mulx)
-	}
-}
-
-func BenchmarkFazbasicSqr(b *testing.B) {
-	var mulx nat
-	mulx = natFromString("812057848953725743532498894375134890158458463578463856324783543381205784895372574353249889437513489015845846357846385632478354338120578489537257435324988943751348901584584635784638563247835433812057848953725743532498894375134890158458463578463856324783543381205784895372574353249889437513489015845846357846385632478354338120578489537257435324988943751348901584584635784638563247835433")
-
-	var z nat
-	n := len(mulx)
-	z = z.make(2 * n)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		basicSqr(z, mulx)
-	}
-}
-
-
 func BenchmarkFazMulAddVWW(b *testing.B) {
-//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
+	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
 	var benchSizes = []int{16}
 
 	for _, n := range benchSizes {
@@ -173,4 +192,3 @@ func BenchmarkFazExp2(b *testing.B) {
 		out.Exp(x, y, n)
 	}
 }
-
