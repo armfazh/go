@@ -122,7 +122,7 @@ E6:	CMPQ BX, R11		// i < n
 
 
 // func intmadd512xN(z, x, y []Word) 
-TEXT ·intmadd512xN(SB),NOSPLIT,$40
+TEXT ·intmaddNxN(SB),NOSPLIT,$40
 	// Push BP
 	MOVQ BP, -8(SP)
 	
@@ -136,7 +136,7 @@ TEXT ·intmadd512xN(SB),NOSPLIT,$40
 L_START_X:
 	MOVQ -40(SP), AX
 	CMPQ AX, $8
-	JLT L_X_SPECIAL
+	JLT L_SINGLE
 	
 	//Save len(y) in -24SP
  	MOVQ y_len+56(FP), AX
@@ -271,10 +271,94 @@ L_END_X:
 	ADDQ $64, SI	
 	JMP L_START_X
 	
-L_X_SPECIAL:
+L_SINGLE:
+	MOVQ y+48(FP), BP
+	MOVQ -40(SP), R11
+	MOVQ y_len+56(FP), R12
+	CMPQ R12, $0
+	JEQ L_END
+	MOVQ $0, R10	
+	
+L_SINGLE_Y:	
+	CMPQ R11, $0
+	JEQ L_END
 
+	MOVQ $0, R8
+	MOVQ $0, CX		
+	MOVQ (BP)(CX*8), BX	
+L_SINGLE_X:	
+	MOVQ (SI)(CX*8), AX
+	MULQ BX
+	ADDQ R8, AX
+	ADCQ $0, DX
+	ADDQ (DI)(CX*8), AX
+	ADCQ $0, DX
+	MOVQ AX, (DI)(CX*8)
+	MOVQ DX, R8
+	
+	ADDQ $1, CX		// i++
+	CMPQ CX, R11		// i < n
+	JLT L_SINGLE_X
+	MOVQ R8, (DI)(CX*8)
+
+	ADDQ $1, R10
+	ADDQ $8, BP		
+	ADDQ $8, DI		
+	CMPQ R10, R12
+	JLT L_SINGLE_Y
 
 L_END:
 	// Pop BP 
 	MOVQ -8(SP), BP
 	RET
+
+
+// func addmulNxN(z, x, y [] Word)
+TEXT ·addmulNxN(SB),NOSPLIT,$8
+	// Push BP
+	MOVQ BP, -8(SP)
+	
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI
+	MOVQ y+48(FP), BP
+
+	MOVQ x_len+32(FP), R11
+	MOVQ y_len+56(FP), R12
+	CMPQ R12, $0
+	JEQ E5
+	MOVQ $0, R10	
+	
+LL5:	
+	CMPQ R11, $0
+	JEQ E5
+
+	MOVQ $0, R8
+	MOVQ $0, CX		
+	MOVQ (BP)(CX*8), BX	
+L5:	MOVQ (SI)(CX*8), AX
+	MULQ BX
+	ADDQ R8, AX
+	ADCQ $0, DX
+	ADDQ (DI)(CX*8), AX
+	ADCQ $0, DX
+	MOVQ AX, (DI)(CX*8)
+	MOVQ DX, R8
+	
+	ADDQ $1, CX		// i++
+	CMPQ CX, R11		// i < n
+	JLT L5
+	MOVQ R8, (DI)(CX*8)
+
+	ADDQ $1, R10
+	ADDQ $8, BP		
+	ADDQ $8, DI		
+	CMPQ R10, R12
+	JLT LL5
+
+E5:
+
+	// Pop BP 
+	MOVQ -8(SP), BP
+	RET
+
+
