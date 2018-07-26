@@ -6,3 +6,4 @@ package big
 func addMulVVW_unrolled(z, x []Word, y Word) (c Word)
 func intmaddNxN(z, x, y []Word)
 func addmulNxN(z, x, y []Word)
+func intmadd1x512(z, x, y []Word)

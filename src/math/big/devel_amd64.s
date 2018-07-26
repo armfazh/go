@@ -121,7 +121,107 @@ E6:	CMPQ BX, R11		// i < n
 	RET
 
 
-// func intmadd512xN(z, x, y []Word) 
+// func intmadd1x512(z, x, y []Word) 
+TEXT ·intmadd1x512(SB),NOSPLIT,$8
+	// Push BP
+	MOVQ BP, -8(SP)
+	
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI
+	MOVQ y+48(FP), BP
+
+	MOVQ $0, CX
+	MOVQ $0, R8
+	MOVQ (BP), BX
+	
+L7:
+	XORQ  R9,  R9
+	XORQ R10, R10
+	XORQ R11, R11
+	XORQ R12, R12
+	XORQ R13, R13
+	XORQ R14, R14
+	XORQ R15, R15
+
+	MOVQ  0(SI)(CX*8), AX
+	MULQ BX
+	ADDQ AX, R8
+	ADCQ DX, R9
+	ADDQ 0(DI)(CX*8), R8
+	ADCQ $0, R9
+	MOVQ  R8,  0(DI)(CX*8)
+	
+	MOVQ  8(SI)(CX*8), AX
+	MULQ BX	
+	ADDQ AX, R9
+	ADCQ DX, R10
+	ADDQ 8(DI)(CX*8), R9
+	ADCQ $0, R10
+	MOVQ  R9,  8(DI)(CX*8)
+	
+	MOVQ 16(SI)(CX*8), AX
+	MULQ BX
+	ADDQ AX, R10
+	ADCQ DX, R11
+	ADDQ 16(DI)(CX*8), R10
+	ADCQ $0, R11
+	MOVQ R10, 16(DI)(CX*8)
+	
+	MOVQ 24(SI)(CX*8), AX
+	MULQ BX
+	ADDQ AX, R11
+	ADCQ DX, R12
+	ADDQ 24(DI)(CX*8), R11
+	ADCQ $0, R12
+	MOVQ R11, 24(DI)(CX*8)
+	
+	MOVQ 32(SI)(CX*8), AX
+	MULQ BX
+	ADDQ AX, R12
+	ADCQ DX, R13
+	ADDQ 32(DI)(CX*8), R12
+	ADCQ $0, R13
+	MOVQ R12, 32(DI)(CX*8)
+	
+	MOVQ 40(SI)(CX*8), AX
+	MULQ BX
+	ADDQ AX, R13
+	ADCQ DX, R14
+	ADDQ 40(DI)(CX*8), R13
+	ADCQ $0, R14
+	MOVQ R13, 40(DI)(CX*8)
+	
+	MOVQ 48(SI)(CX*8), AX
+	MULQ BX
+	ADDQ AX, R14
+	ADCQ DX, R15
+	ADDQ 48(DI)(CX*8), R14
+	ADCQ $0, R15
+	MOVQ R14, 48(DI)(CX*8)
+	
+	MOVQ 56(SI)(CX*8), AX
+	MULQ BX
+	ADDQ AX, R15
+	ADCQ $0, DX
+	ADDQ 56(DI)(CX*8), R15
+	ADCQ $0, DX
+	MOVQ R15, 56(DI)(CX*8)
+	
+	MOVQ DX, R8
+	
+	ADDQ $8, CX
+	MOVQ x_len+32(FP), AX
+	CMPQ CX, AX
+	JLT L7
+	
+	MOVQ  R8,  0(DI)(CX*8)
+		
+	// Pop BP 
+	MOVQ -8(SP), BP
+	RET
+
+
+// func intmaddNxN(z, x, y []Word) 
 TEXT ·intmaddNxN(SB),NOSPLIT,$40
 	// Push BP
 	MOVQ BP, -8(SP)

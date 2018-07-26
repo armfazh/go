@@ -16,3 +16,9 @@ func addmulNxN(z, x, y []Word) {
 	z[0] = x[0] + y[0]
 	return
 }
+
+func intmadd1x512(z, x, y []Word) {
+	z[0] = x[0] + y[0]
+	return
+
+}

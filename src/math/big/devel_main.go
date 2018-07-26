@@ -32,8 +32,9 @@ func intmult(z, x, y nat) {
 	//	addmul64xN(zz,x[:16],y)
 	//	zz.PrintHex()
 
-	intmaddNxN(z, x, y)
-
+//	intmaddNxN(z, x, y)
+	intmadd1x512(z, x[:16], y)
+	
 	//	for i, v := range z {
 	//		if v != zz[i] {
 	//			fmt.Printf("[NoEqual]\n")
