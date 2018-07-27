@@ -32,15 +32,44 @@ func intmult(z, x, y nat) {
 	//	addmul64xN(zz,x[:16],y)
 	//	zz.PrintHex()
 
-//	intmaddNxN(z, x, y)
+	//	intmaddNxN(z, x, y)
 	intmadd1x512(z, x[:16], y)
-	
+
 	//	for i, v := range z {
 	//		if v != zz[i] {
 	//			fmt.Printf("[NoEqual]\n")
 	//		}
 	//	}
 	return
+}
+
+func test_montgo() {
+
+	x := natFromString2("0x42d6a0e4cff274f79d86193a51bc588c337e4774ded7691ea5a7f21609422e05fb6e7123ff9d98c44ec46973e579c654174d4e4c17501ee214347daf46d7be6a")
+	y := natFromString2("0xe8b2ba200c3bf580ae036abdebee429b22ca7ba788ede537046d07e3b2b83e0d0bdb0f3395b5e7cb2c0afd98183071073a3872a8939e4e5c6392c4b397a53071")
+	m := natFromString2("0xe8b2ba200c3036abdebee429b2bf580ae2ca7ba788ede537046d07e3b2b83e0d0bdb0f3395b5e7cb2c0afd98183071073a3872a8939e4e5c6392c4b397a531d7")
+	//	m := natFromString2("0xe8b2ba200c3bf580ae036abdebee429b22ca7ba788ede537046d07e3b2b83e0d0bdb0f3395b5e7cb2c0afd98183071073a3872a8939e4e5c6392c4b397a531d7")
+
+	
+	x.PrintHex()
+	y.PrintHex()
+	m.PrintHex()
+
+	var k0 Word
+	k0 = 0xd7a8b1459b32ae19
+	var z nat
+	z = z.montgomery(x, y, m, k0, len(m))
+	z.PrintHex()
+
+	var f nat
+	f = f.montgomery512(x, y, m, k0, len(m))
+	f.PrintHex()
+
+	//	z := nat(nil).make(len(x) + len(y))
+	//	z.clear()
+	//	fmt.Printf("lx: %d ly: %d\n", len(x), len(y))
+	//	intmult(z, x, y)
+	//	z.PrintHex()
 }
 
 func test_intmult() {
@@ -101,6 +130,7 @@ func test_nat() {
 func (i Int) MasPruebas() {
 
 	//	test_nat()
-	test_intmult()
+	//	test_intmult()
+	test_montgo()
 
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 )
-/*
+
 func BenchmarkFazMontgomery(b *testing.B) {
 	var benchSizes = []int{8, 16, 32, 64}
 	var k Word
@@ -22,6 +22,26 @@ func BenchmarkFazMontgomery(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkFazMontgomery512(b *testing.B) {
+	var benchSizes = []int{8, 16, 32, 64}
+	var k Word
+	k = (1 << 64) - 1
+	for _, n := range benchSizes {
+		mulx := rndV(n)
+		muly := rndV(n)
+		mod := rndV(n)
+		z := nat(nil).make(len(mulx) + len(muly))
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				z.montgomery512(mulx, muly, mod, k, n)
+			}
+		})
+	}
+}
+
+/*
 
 func BenchmarkFazIntMul(b *testing.B) {
 	var benchSizes = []int{8, 16, 32, 64}
@@ -126,7 +146,7 @@ func BenchmarkFazbasicSqr(b *testing.B) {
 
 func BenchmarkFazaddmul1x512(b *testing.B) {
 	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
-	var benchSizes = []int{16,32,64}
+	var benchSizes = []int{8, 16, 32}
 
 	for _, n := range benchSizes {
 		x := rndV(n)
@@ -141,18 +161,19 @@ func BenchmarkFazaddmul1x512(b *testing.B) {
 	}
 }
 
-func BenchmarkFazAddMulVVW_unrolled(b *testing.B) {
+func BenchmarkFazAddMulVVW_un(b *testing.B) {
 	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
-	var benchSizes = []int{16,32,64}
+	var benchSizes = []int{8, 16, 32}
 
 	for _, n := range benchSizes {
 		x := rndV(n)
 		y := rndW()
 		z := make([]Word, n)
+		var c Word
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {
-				addMulVVW_unrolled(z, x, y)
+				addMulVVW_unrolled(z, x, y, c)
 			}
 		})
 	}
@@ -160,7 +181,7 @@ func BenchmarkFazAddMulVVW_unrolled(b *testing.B) {
 
 func BenchmarkFazAddMulVVW(b *testing.B) {
 	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
-	var benchSizes = []int{16,32,64}
+	var benchSizes = []int{8, 16, 32}
 
 	for _, n := range benchSizes {
 		x := rndV(n)
@@ -177,7 +198,7 @@ func BenchmarkFazAddMulVVW(b *testing.B) {
 
 func BenchmarkFazMulAddVWW(b *testing.B) {
 	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
-	var benchSizes = []int{16,32,64}
+	var benchSizes = []int{8, 16, 32}
 
 	for _, n := range benchSizes {
 		x := rndV(n)
@@ -191,7 +212,6 @@ func BenchmarkFazMulAddVWW(b *testing.B) {
 		})
 	}
 }
-
 
 func BenchmarkFazExp(b *testing.B) {
 	x, _ := new(Int).SetString("11001289118363089646017359372117963499250546375269047542777928006103246876688756735760905680604646624353196869572752623285140408755420374049317646428185270079555372763503115646054602867593662923894140940837479507194934267532831694565516466765025434902348314525627418515646588160955862839022051353653052947073136084780742729727874803457643848197499548297570026926927502505634297079527299004267769780768565695459945235586892627059178884998772989397505061206395455591503771677500931269477503508150175717121828518985901959919560700853226255420793148986854391552859459511723547532575574664944815966793196961286234040892865", 0)

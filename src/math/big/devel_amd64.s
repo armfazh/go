@@ -1,8 +1,8 @@
 // +build !math_big_pure_go
 
 #include "textflag.h"
-
-// func addMulVVW_unrolled(z, x []Word, y Word) (c Word)
+	
+// func addMulVVW_unrolled(z, x []Word, y Word, cin Word) (cout Word)
 TEXT ·addMulVVW_unrolled(SB),NOSPLIT,$0
 	MOVQ z+0(FP), R10
 	MOVQ x+24(FP), R8
@@ -10,114 +10,32 @@ TEXT ·addMulVVW_unrolled(SB),NOSPLIT,$0
 	MOVQ z_len+8(FP), R11
 	MOVQ $0, BX		// i = 0
 	MOVQ $0, CX		// c = 0
-	MOVQ R11, R12
-	ANDQ $-8, R12
-	CMPQ R11, $8
-	JAE A6
-	JMP E6
 
-A6:
-	MOVQ (R8)(BX*8), AX
+	CMPQ R11, $0		// i is 0?
+	JEQ E6
+
+L6:	MOVQ (R8)(BX*8), AX
 	MULQ R9
-	ADDQ (R10)(BX*8), AX
-	ADCQ $0, DX
 	ADDQ CX, AX
 	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (R10)(BX*8)
-
-	MOVQ (8)(R8)(BX*8), AX
-	MULQ R9
-	ADDQ (8)(R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
+	ADDQ AX, (R10)(BX*8)
 	ADCQ $0, DX
 	MOVQ DX, CX
-	MOVQ AX, (8)(R10)(BX*8)
-
-	MOVQ (16)(R8)(BX*8), AX
-	MULQ R9
-	ADDQ (16)(R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
-	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (16)(R10)(BX*8)
-
-	MOVQ (24)(R8)(BX*8), AX
-	MULQ R9
-	ADDQ (24)(R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
-	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (24)(R10)(BX*8)
-
-	MOVQ (32)(R8)(BX*8), AX
-	MULQ R9
-	ADDQ (32)(R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
-	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (32)(R10)(BX*8)
-
-	MOVQ (40)(R8)(BX*8), AX
-	MULQ R9
-	ADDQ (40)(R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
-	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (40)(R10)(BX*8)
-
-	MOVQ (48)(R8)(BX*8), AX
-	MULQ R9
-	ADDQ (48)(R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
-	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (48)(R10)(BX*8)
-
-	MOVQ (56)(R8)(BX*8), AX
-	MULQ R9
-	ADDQ (56)(R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
-	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (56)(R10)(BX*8)
-
-	ADDQ $8, BX
-	CMPQ BX, R12
-	JL A6
-	JMP E6
-
-L6:	
-	MOVQ (R8)(BX*8), AX
-	MULQ R9
-	ADDQ (R10)(BX*8), AX
-	ADCQ $0, DX
-	ADDQ CX, AX
-	ADCQ $0, DX
-	MOVQ DX, CX
-	MOVQ AX, (R10)(BX*8)
-	
-	//MOVQ (R8)(BX*8), AX
-	//MULQ R9
-	//ADDQ CX, AX
-	//ADCQ $0, DX
-	//ADDQ AX, (R10)(BX*8)
-	//ADCQ $0, DX
-	//MOVQ DX, CX
 	
 	ADDQ $1, BX		// i++
-
-E6:	CMPQ BX, R11		// i < n
+	CMPQ BX, R11		// i < n
 	JL L6
-
-	MOVQ CX, c+56(FP)
+	
+	XORQ CX, CX
+	MOVQ cin+56(FP), AX
+	ADDQ (R10)(BX*8), DX
+	ADCQ $0, CX
+	ADDQ AX, DX
+	ADCQ $0, CX
+	
+	MOVQ DX, (R10)(BX*8)
+E6:
+	MOVQ CX, cout+64(FP)
 	RET
 
 
@@ -135,77 +53,70 @@ TEXT ·intmadd1x512(SB),NOSPLIT,$8
 	MOVQ (BP), BX
 	
 L7:
-	XORQ  R9,  R9
-	XORQ R10, R10
-	XORQ R11, R11
-	XORQ R12, R12
-	XORQ R13, R13
-	XORQ R14, R14
-	XORQ R15, R15
 
-	MOVQ  0(SI)(CX*8), AX
+	MOVQ 0(SI)(CX*8), AX
 	MULQ BX
-	ADDQ AX, R8
-	ADCQ DX, R9
-	ADDQ 0(DI)(CX*8), R8
-	ADCQ $0, R9
-	MOVQ  R8,  0(DI)(CX*8)
+	ADDQ R8, AX
+	ADCQ $0, DX
+	ADDQ 0(DI)(CX*8), AX
+	ADCQ $0, DX
+	MOVQ AX, 0(DI)(CX*8)
 	
-	MOVQ  8(SI)(CX*8), AX
+	MOVQ 8(SI)(CX*8), AX
 	MULQ BX	
-	ADDQ AX, R9
-	ADCQ DX, R10
-	ADDQ 8(DI)(CX*8), R9
-	ADCQ $0, R10
+	ADDQ R8, AX
+	ADCQ $0, DX
+	ADDQ 8(DI)(CX*8), AX
+	ADCQ $0, DX
 	MOVQ  R9,  8(DI)(CX*8)
 	
 	MOVQ 16(SI)(CX*8), AX
 	MULQ BX
 	ADDQ AX, R10
+		MOVQ 24(SI)(CX*8), AX
 	ADCQ DX, R11
 	ADDQ 16(DI)(CX*8), R10
-	ADCQ $0, R11
 	MOVQ R10, 16(DI)(CX*8)
+	ADCQ $0, R11
 	
-	MOVQ 24(SI)(CX*8), AX
 	MULQ BX
 	ADDQ AX, R11
+		MOVQ 32(SI)(CX*8), AX
 	ADCQ DX, R12
 	ADDQ 24(DI)(CX*8), R11
-	ADCQ $0, R12
 	MOVQ R11, 24(DI)(CX*8)
+	ADCQ $0, R12
 	
-	MOVQ 32(SI)(CX*8), AX
 	MULQ BX
 	ADDQ AX, R12
+		MOVQ 40(SI)(CX*8), AX
 	ADCQ DX, R13
 	ADDQ 32(DI)(CX*8), R12
-	ADCQ $0, R13
 	MOVQ R12, 32(DI)(CX*8)
+	ADCQ $0, R13
 	
-	MOVQ 40(SI)(CX*8), AX
 	MULQ BX
 	ADDQ AX, R13
+		MOVQ 48(SI)(CX*8), AX
 	ADCQ DX, R14
 	ADDQ 40(DI)(CX*8), R13
-	ADCQ $0, R14
 	MOVQ R13, 40(DI)(CX*8)
+	ADCQ $0, R14
 	
-	MOVQ 48(SI)(CX*8), AX
 	MULQ BX
 	ADDQ AX, R14
+		MOVQ 56(SI)(CX*8), AX
 	ADCQ DX, R15
 	ADDQ 48(DI)(CX*8), R14
-	ADCQ $0, R15
 	MOVQ R14, 48(DI)(CX*8)
+	ADCQ $0, R15
 	
-	MOVQ 56(SI)(CX*8), AX
 	MULQ BX
+	ADDQ 56(DI)(CX*8), R15
 	ADDQ AX, R15
 	ADCQ $0, DX
-	ADDQ 56(DI)(CX*8), R15
-	ADCQ $0, DX
 	MOVQ R15, 56(DI)(CX*8)
+	ADCQ $0, DX
 	
 	MOVQ DX, R8
 	
