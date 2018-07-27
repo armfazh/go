@@ -44,26 +44,41 @@ func intmult(z, x, y nat) {
 }
 
 func test_montgo() {
-
-	x := natFromString2("0x42d6a0e4cff274f79d86193a51bc588c337e4774ded7691ea5a7f21609422e05fb6e7123ff9d98c44ec46973e579c654174d4e4c17501ee214347daf46d7be6a")
-	y := natFromString2("0xe8b2ba200c3bf580ae036abdebee429b22ca7ba788ede537046d07e3b2b83e0d0bdb0f3395b5e7cb2c0afd98183071073a3872a8939e4e5c6392c4b397a53071")
-	m := natFromString2("0xe8b2ba200c3036abdebee429b2bf580ae2ca7ba788ede537046d07e3b2b83e0d0bdb0f3395b5e7cb2c0afd98183071073a3872a8939e4e5c6392c4b397a531d7")
+//	x := natFromString2("0x42d6a0e4cff274f79d86193a51bc588c337e4774ded7691ea5a7f21609422e05fb6e7123ff9d98c44ec46973e579c654174d4e4c17501ee2142342847329432234284732230743298bacaacdefacafceafceefacafacdec9432347daf46d7be6a3f563dcce8b5805fd69bbd8160640b738c8db8683653b433cadecafceaecfa9874231749237429723504385704570435943f563dcce8b5805fd69bbd8160")
+//	y := natFromString2("0xe8b2ba200c3bf580ae036abdebee429b22ca7ba788ede537046d07e3b2b83e0d0bdb0f3395b5e7cb2c0afd98183071073a3872a8939e4e5c6392c4b397a5307148237013275813240273208538473483243984328bb48320432423894732840237423b48320432423894732840237423b48320432423894732840237423b48320432423894732840237423b48320432423894732840237423428473294321")
+//	m := natFromString2("0x0732104832148325826538246381274832740126136532643265326de8e597bf03ee5209a2395dbbad963ddc86f9dcfc32f8c91db039b388b5a78462a8ca7913eba135c146085fa317da0dd02031b11518eb781f9f945057e9b341c902e26a0c13f563dcce8b5805fd69bbd8160640b738c8db8683653b4336b1176b2801892196a6e1b3fe88e51d6476f86e47d99d4d67ee861d4321423ef612c3877cf07")
 	//	m := natFromString2("0xe8b2ba200c3bf580ae036abdebee429b22ca7ba788ede537046d07e3b2b83e0d0bdb0f3395b5e7cb2c0afd98183071073a3872a8939e4e5c6392c4b397a531d7")
 
-	
+	x := nat(nil).make(21)
+	y := nat(nil).make(21)
+	m := nat(nil).make(21)
+
+	for i := range(x) {
+		x[i] = 0xffffffffffffffff
+	}
+	for i := range(y) {
+		y[i] = 0xffffffffffffffff
+	}
+	for i := range(m) {
+		m[i] = 0xffffffffffffffff
+	}
+
 	x.PrintHex()
 	y.PrintHex()
 	m.PrintHex()
 
 	var k0 Word
-	k0 = 0xd7a8b1459b32ae19
+	k0 = 0xdecc8f1249812adf
 	var z nat
-	z = z.montgomery(x, y, m, k0, len(m))
-	z.PrintHex()
+	z = nat(nil).montgomery(x, y, m, k0, len(m))
+//	z.PrintHex()
 
-	var f nat
-	f = f.montgomery512(x, y, m, k0, len(m))
+	f := nat(nil).montgomery512(x, y, m, k0, len(m))
 	f.PrintHex()
+
+	if z.cmp(f) != 0 {
+		fmt.Println("Error")
+	}
 
 	//	z := nat(nil).make(len(x) + len(y))
 	//	z.clear()

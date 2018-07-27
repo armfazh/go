@@ -7,7 +7,7 @@ TEXT ·addMulVVW_unrolled(SB),NOSPLIT,$0
 	MOVQ z+0(FP), R10
 	MOVQ x+24(FP), R8
 	MOVQ y+48(FP), R9
-	MOVQ z_len+8(FP), R11
+	MOVQ x_len+32(FP), R11
 	MOVQ $0, BX		// i = 0
 	MOVQ $0, CX		// c = 0
 
@@ -244,7 +244,7 @@ L1:
 	MOVQ -16(SP), AX
 	ADDQ $1, CX
 	CMPQ CX, AX
-	JL L1
+	JLT L1
 	
 	ADDQ  0(DI)(CX*8),  R8
 	ADCQ  8(DI)(CX*8),  R9
@@ -286,17 +286,17 @@ L_SINGLE:
 	MOVQ y+48(FP), BP
 	MOVQ -40(SP), R11
 	MOVQ y_len+56(FP), R12
+	CMPQ R11, $0
+	JEQ L_END
 	CMPQ R12, $0
 	JEQ L_END
+	
 	MOVQ $0, R10	
 	
 L_SINGLE_Y:	
-	CMPQ R11, $0
-	JEQ L_END
-
 	MOVQ $0, R8
-	MOVQ $0, CX		
-	MOVQ (BP)(CX*8), BX	
+	MOVQ $0, CX
+	MOVQ (BP), BX	
 L_SINGLE_X:	
 	MOVQ (SI)(CX*8), AX
 	MULQ BX
@@ -310,11 +310,12 @@ L_SINGLE_X:
 	ADDQ $1, CX		// i++
 	CMPQ CX, R11		// i < n
 	JLT L_SINGLE_X
-	MOVQ R8, (DI)(CX*8)
+	ADDQ R8,  (DI)(CX*8)
+	ADCQ $0, 8(DI)(CX*8)
 
 	ADDQ $1, R10
-	ADDQ $8, BP		
-	ADDQ $8, DI		
+	ADDQ $8, BP
+	ADDQ $8, DI
 	CMPQ R10, R12
 	JLT L_SINGLE_Y
 

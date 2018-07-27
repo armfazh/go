@@ -65,6 +65,8 @@ func TestMontgomery512(t *testing.T) {
 		z = z.norm()
 		if z.cmp(out) != 0 {
 			t.Errorf("#%d: got 0x%s want 0x%s", i, z.utoa(16), out.utoa(16))
+			z.PrintHex()			
+			out.PrintHex()
 		}
 	}
 }
