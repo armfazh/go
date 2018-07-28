@@ -20,16 +20,15 @@ func (z nat) montgomery512(x, y, m nat, k Word, n int) nat {
 	z = z.make(2*n + 1)
 	z.clear()
 
-	intmaddNxN(z, x[:16], y)
-	z.PrintHex()
-	//	var c Word
-	//	for i := 0; i < n; i++ {
-	//		t := z[i] * k
-	//		c = addMulVVW_unrolled(z[i:], m, t, c)
-	//	}
-	//	if c != 0 {
-	//		subVV(z[n:2*n], z[n:2*n], m)
-	//	}
-	//	z = z[n : 2*n]
+	intmaddNxN(z, x, y)
+	var c Word
+	for i := 0; i < n; i++ {
+		t := z[i] * k
+		c = addMulVVW_unrolled(z[i:], m, t, c)
+	}
+	if c != 0 {
+		subVV(z[n:2*n], z[n:2*n], m)
+	}
+	z = z[n : 2*n]
 	return z
 }

@@ -196,18 +196,18 @@ func BenchmarkFazAddMulVVW(b *testing.B) {
 	}
 }
 
-func BenchmarkFazMulAddVWW(b *testing.B) {
+func BenchmarkFazintmul512xN(b *testing.B) {
 	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
 	var benchSizes = []int{8, 16, 24, 32}
 
 	for _, n := range benchSizes {
 		x := rndV(n)
-		y := rndW()
-		z := make([]Word, n)
+		y := rndV(n)
+		z := make([]Word, len(x)+len(y))
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {
-				mulAddVWW(z, x, y, 0)
+				intmul512xN(z, x, y)
 			}
 		})
 	}
