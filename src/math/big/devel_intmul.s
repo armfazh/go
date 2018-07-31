@@ -2,6 +2,9 @@
 
 #include "textflag.h"
 
+////////////////////////////////////////////////
+//   n=512 bits
+////////////////////////////////////////////////
 #define MADD64x512 \
 	MULXQ  0(SI), R8,  R9;      \
 	MULXQ  8(SI), AX, R10;    ADDQ AX,  R9  \
@@ -54,6 +57,60 @@ L_END:
 	RET   // End of intmadd512x512 function
 
 
+/////////////////////////////////////////////////
+// func intmadd64x512(z, x []Word, y Word, cin Word) (cout Word)
+TEXT ·intmadd64x512(SB),NOSPLIT,$8
+	// Push BP
+	MOVQ BP, -8(SP)
+	
+	//Early return 
+	// if len(x) == 0 then goto END
+	MOVQ x_len+32(FP), AX
+	CMPQ AX, $0
+	JEQ L_END
+	
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI
+		
+	MOVQ y+48(FP), DX
+	MULXQ  0(SI), R8,  R9;    
+	MULXQ  8(SI), AX, R10;    ADDQ AX,  R9
+	MULXQ 16(SI), AX, R11;    ADCQ AX, R10
+	MULXQ 24(SI), AX, R12;    ADCQ AX, R11
+	MULXQ 32(SI), AX, R13;    ADCQ AX, R12
+	MULXQ 40(SI), AX, R14;    ADCQ AX, R13  
+	MULXQ 48(SI), AX, R15;    ADCQ AX, R14
+	MULXQ 56(SI), AX,  DX;    ADCQ AX, R15
+	;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX
+	XORQ AX, AX
+	ADDQ  0(DI),  R8;  MOVQ  R8,  0(DI) 
+	ADCQ  8(DI),  R9;  MOVQ  R9,  8(DI) 
+	ADCQ 16(DI), R10;  MOVQ R10, 16(DI) 
+	ADCQ 24(DI), R11;  MOVQ R11, 24(DI) 
+	ADCQ 32(DI), R12;  MOVQ R12, 32(DI) 
+	ADCQ 40(DI), R13;  MOVQ R13, 40(DI) 
+	ADCQ 48(DI), R14;  MOVQ R14, 48(DI) 
+	ADCQ 56(DI), R15;  MOVQ R15, 56(DI)
+	ADCQ 64(DI),  DX;  MOVQ  DX, 64(DI)
+	ADCQ     $0,  AX;
+
+	ADDQ $64, DI
+	ADDQ $64, SI
+	
+	MOVQ cin+56(FP), CX
+	ADDQ CX, DX
+	ADCQ $0, AX
+	MOVQ DX, 0(DI)
+	MOVQ AX, cout+64(FP)
+    
+L_END:
+	// Pop BP
+	MOVQ -8(SP), BP
+	RET
+	
+////////////////////////////////////////////////
+//   n=1024 bits
+////////////////////////////////////////////////
 #define MADD64x1024 \
 	MOVQ 0(BP), DX  \
 	MULXQ  0(SI), R8,  R9;      \
@@ -123,10 +180,9 @@ L_END:
 	MOVQ -8(SP), BP
 	RET   // End of intmadd1024x1024 function
 
-
 /////////////////////////////////////////////////
-// func intmadd64x512(z, x []Word, y Word, n int, cin Word) (cout Word)
-TEXT ·intmadd64x512(SB),NOSPLIT,$8
+// func intmadd64x1024(z, x []Word, y Word, cin Word) (cout Word)
+TEXT ·intmadd64x1024(SB),NOSPLIT,$8
 	// Push BP
 	MOVQ BP, -8(SP)
 	
@@ -137,23 +193,18 @@ TEXT ·intmadd64x512(SB),NOSPLIT,$8
 	JEQ L_END
 	
 	MOVQ z+ 0(FP), DI
-	MOVQ x+24(FP), SI
-	MOVQ n+56(FP), CX
-	
-	MOVQ $0, AX
-	
-L_X_NTIMES:
+	MOVQ x+24(FP), SI	
 	MOVQ y+48(FP), DX
-	MULXQ  0(SI), R8,  R9;    ADDQ AX,  R8
-	MULXQ  8(SI), AX, R10;    ADCQ AX,  R9
-	MULXQ 16(SI), AX, R11;    ADCQ AX, R10
-	MULXQ 24(SI), AX, R12;    ADCQ AX, R11
-	MULXQ 32(SI), AX, R13;    ADCQ AX, R12
+	
+	MULXQ  0(SI), R8,  R9;      
+	MULXQ  8(SI), AX, R10;    ADDQ AX,  R9  
+	MULXQ 16(SI), AX, R11;    ADCQ AX, R10  
+	MULXQ 24(SI), AX, R12;    ADCQ AX, R11  
+	MULXQ 32(SI), AX, R13;    ADCQ AX, R12  
 	MULXQ 40(SI), AX, R14;    ADCQ AX, R13  
-	MULXQ 48(SI), AX, R15;    ADCQ AX, R14
-	MULXQ 56(SI), AX,  DX;    ADCQ AX, R15
-	;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX
-	XORQ AX, AX
+	MULXQ 48(SI), AX, R15;    ADCQ AX, R14  
+	MULXQ 56(SI), AX,  DX;    ADCQ AX, R15  
+	;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX  
 	ADDQ  0(DI),  R8;  MOVQ  R8,  0(DI) 
 	ADCQ  8(DI),  R9;  MOVQ  R9,  8(DI) 
 	ADCQ 16(DI), R10;  MOVQ R10, 16(DI) 
@@ -161,23 +212,223 @@ L_X_NTIMES:
 	ADCQ 32(DI), R12;  MOVQ R12, 32(DI) 
 	ADCQ 40(DI), R13;  MOVQ R13, 40(DI) 
 	ADCQ 48(DI), R14;  MOVQ R14, 48(DI) 
-	ADCQ 56(DI), R15;  MOVQ R15, 56(DI)
-	ADCQ 64(DI),  DX;  MOVQ  DX, 64(DI)
-	ADCQ     $0,  AX;
-
-	ADDQ $64, DI
-	ADDQ $64, SI
-	SUBQ $1, CX
-	JNZ	L_X_NTIMES
+	ADCQ 56(DI), R15;  MOVQ R15, 56(DI) 
+	                ;  MOVQ  DX, AX
+	MOVQ y+48(FP), DX
+	MULXQ  64(SI), R8,  R9;    ADCQ AX,  R8   
+	MULXQ  72(SI), AX, R10;    ADCQ AX,  R9  
+	MULXQ  80(SI), AX, R11;    ADCQ AX, R10  
+	MULXQ  88(SI), AX, R12;    ADCQ AX, R11  
+	MULXQ  96(SI), AX, R13;    ADCQ AX, R12  
+	MULXQ 104(SI), AX, R14;    ADCQ AX, R13  
+	MULXQ 112(SI), AX, R15;    ADCQ AX, R14  
+	MULXQ 120(SI), AX,  DX;    ADCQ AX, R15; MOVQ $0, AX
+	;;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX
+	;;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  AX
+	ADDQ  64(DI),  R8;  MOVQ  R8,  64(DI)
+	ADCQ  72(DI),  R9;  MOVQ  R9,  72(DI)
+	ADCQ  80(DI), R10;  MOVQ R10,  80(DI)
+	ADCQ  88(DI), R11;  MOVQ R11,  88(DI)
+	ADCQ  96(DI), R12;  MOVQ R12,  96(DI)
+	ADCQ 104(DI), R13;  MOVQ R13, 104(DI)
+	ADCQ 112(DI), R14;  MOVQ R14, 112(DI)
+	ADCQ 120(DI), R15;  MOVQ R15, 120(DI)
+	ADCQ 128(DI),  DX;  MOVQ  DX, 128(DI)
+	ADCQ      $0,  AX
 	
-	MOVQ cin+64(FP), CX
+	ADDQ $128, DI
+	ADDQ $128, SI
+	
+	MOVQ cin+56(FP), CX
 	ADDQ CX, DX
 	ADCQ $0, AX
 	MOVQ DX, 0(DI)
-	MOVQ AX, cout+72(FP)
+	MOVQ AX, cout+64(FP)
     
 L_END:
 	// Pop BP
 	MOVQ -8(SP), BP
-	RET
+	RET  // End of intmadd64x1024 function
+	
+	
+////////////////////////////////////////////////
+//   n=1536 bits
+////////////////////////////////////////////////
 
+#define MADD64x1536 \
+	MOVQ 0(BP), DX  \
+	MULXQ  0(SI), R8,  R9;      \
+	MULXQ  8(SI), AX, R10;    ADDQ AX,  R9  \
+	MULXQ 16(SI), AX, R11;    ADCQ AX, R10  \
+	MULXQ 24(SI), AX, R12;    ADCQ AX, R11  \
+	MULXQ 32(SI), AX, R13;    ADCQ AX, R12  \
+	MULXQ 40(SI), AX, R14;    ADCQ AX, R13  \
+	MULXQ 48(SI), AX, R15;    ADCQ AX, R14  \
+	MULXQ 56(SI), AX,  DX;    ADCQ AX, R15  \
+	;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX  \
+	ADDQ  0(DI),  R8;  MOVQ  R8,  0(DI) \
+	ADCQ  8(DI),  R9;  MOVQ  R9,  8(DI) \
+	ADCQ 16(DI), R10;  MOVQ R10, 16(DI) \
+	ADCQ 24(DI), R11;  MOVQ R11, 24(DI) \
+	ADCQ 32(DI), R12;  MOVQ R12, 32(DI) \
+	ADCQ 40(DI), R13;  MOVQ R13, 40(DI) \
+	ADCQ 48(DI), R14;  MOVQ R14, 48(DI) \
+	ADCQ 56(DI), R15;  MOVQ R15, 56(DI) \
+	ADCQ     $0,  DX;  MOVQ  DX, R8 \
+	MOVQ 0(BP), DX  \	
+	MULXQ  64(SI), AX,  R9;    ADCQ AX,  R8  \ 
+	MULXQ  72(SI), AX, R10;    ADCQ AX,  R9  \
+	MULXQ  80(SI), AX, R11;    ADCQ AX, R10  \
+	MULXQ  88(SI), AX, R12;    ADCQ AX, R11  \
+	MULXQ  96(SI), AX, R13;    ADCQ AX, R12  \
+	MULXQ 104(SI), AX, R14;    ADCQ AX, R13  \
+	MULXQ 112(SI), AX, R15;    ADCQ AX, R14  \
+	MULXQ 120(SI), AX,  DX;    ADCQ AX, R15  \
+	;;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX  \
+	ADDQ  64(DI),  R8;  MOVQ  R8,  64(DI) \
+	ADCQ  72(DI),  R9;  MOVQ  R9,  72(DI) \
+	ADCQ  80(DI), R10;  MOVQ R10,  80(DI) \
+	ADCQ  88(DI), R11;  MOVQ R11,  88(DI) \
+	ADCQ  96(DI), R12;  MOVQ R12,  96(DI) \
+	ADCQ 104(DI), R13;  MOVQ R13, 104(DI) \
+	ADCQ 112(DI), R14;  MOVQ R14, 112(DI) \
+	ADCQ 120(DI), R15;  MOVQ R15, 120(DI) \
+	ADCQ     $0,   DX;  MOVQ  DX, R8 \
+	MOVQ 0(BP), DX  \
+	MULXQ 128(SI), AX,  R9;    ADCQ AX,  R8  \ 
+	MULXQ 136(SI), AX, R10;    ADCQ AX,  R9  \
+	MULXQ 144(SI), AX, R11;    ADCQ AX, R10  \
+	MULXQ 152(SI), AX, R12;    ADCQ AX, R11  \
+	MULXQ 160(SI), AX, R13;    ADCQ AX, R12  \
+	MULXQ 168(SI), AX, R14;    ADCQ AX, R13  \
+	MULXQ 176(SI), AX, R15;    ADCQ AX, R14  \
+	MULXQ 184(SI), AX,  DX;    ADCQ AX, R15  \
+	;;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX  \
+	ADDQ 128(DI),  R8;  MOVQ  R8, 128(DI) \
+	ADCQ 136(DI),  R9;  MOVQ  R9, 136(DI) \
+	ADCQ 144(DI), R10;  MOVQ R10, 144(DI) \
+	ADCQ 152(DI), R11;  MOVQ R11, 152(DI) \
+	ADCQ 160(DI), R12;  MOVQ R12, 160(DI) \
+	ADCQ 168(DI), R13;  MOVQ R13, 168(DI) \
+	ADCQ 176(DI), R14;  MOVQ R14, 176(DI) \
+	ADCQ 184(DI), R15;  MOVQ R15, 184(DI) \
+	ADCQ 192(DI),  DX;  MOVQ  DX, 192(DI) \
+
+// func intmadd1536x1536(z, x, y []Word)
+TEXT ·intmadd1536x1536(SB),NOSPLIT,$8
+	// Push BP
+	MOVQ BP, -8(SP)
+	
+	//Early return 
+	// if len(x) == 0 OR len(y) == 0 then goto END
+	MOVQ x_len+32(FP), AX
+	MOVQ y_len+56(FP), DX
+	ANDQ DX, AX
+	JZ L_END
+	
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI
+	MOVQ y+48(FP), BP
+	
+	MOVQ $24, CX
+L_X_24TIMES:
+	MADD64x1536
+	ADDQ $8, DI
+	ADDQ $8, BP
+	SUBQ $1, CX
+	JNZ	L_X_24TIMES
+    
+L_END:
+	// Pop BP
+	MOVQ -8(SP), BP
+	RET   // End of intmadd1536x1536 function
+
+/////////////////////////////////////////////////
+// func intmadd64x1536(z, x []Word, y Word, cin Word) (cout Word)
+TEXT ·intmadd64x1536(SB),NOSPLIT,$8
+	// Push BP
+	MOVQ BP, -8(SP)
+	
+	//Early return 
+	// if len(x) == 0 then goto END
+	MOVQ x_len+32(FP), AX
+	CMPQ AX, $0
+	JEQ L_END
+	
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI	
+	MOVQ y+48(FP), DX
+	
+	MULXQ  0(SI), R8,  R9;      
+	MULXQ  8(SI), AX, R10;    ADDQ AX,  R9  
+	MULXQ 16(SI), AX, R11;    ADCQ AX, R10  
+	MULXQ 24(SI), AX, R12;    ADCQ AX, R11  
+	MULXQ 32(SI), AX, R13;    ADCQ AX, R12  
+	MULXQ 40(SI), AX, R14;    ADCQ AX, R13  
+	MULXQ 48(SI), AX, R15;    ADCQ AX, R14  
+	MULXQ 56(SI), AX,  DX;    ADCQ AX, R15  
+	;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX  
+	ADDQ  0(DI),  R8;  MOVQ  R8,  0(DI) 
+	ADCQ  8(DI),  R9;  MOVQ  R9,  8(DI) 
+	ADCQ 16(DI), R10;  MOVQ R10, 16(DI) 
+	ADCQ 24(DI), R11;  MOVQ R11, 24(DI) 
+	ADCQ 32(DI), R12;  MOVQ R12, 32(DI) 
+	ADCQ 40(DI), R13;  MOVQ R13, 40(DI) 
+	ADCQ 48(DI), R14;  MOVQ R14, 48(DI) 
+	ADCQ 56(DI), R15;  MOVQ R15, 56(DI) 
+	                ;  MOVQ  DX, AX
+	MOVQ y+48(FP), DX
+	MULXQ  64(SI), R8,  R9;    ADCQ AX,  R8   
+	MULXQ  72(SI), AX, R10;    ADCQ AX,  R9  
+	MULXQ  80(SI), AX, R11;    ADCQ AX, R10  
+	MULXQ  88(SI), AX, R12;    ADCQ AX, R11  
+	MULXQ  96(SI), AX, R13;    ADCQ AX, R12  
+	MULXQ 104(SI), AX, R14;    ADCQ AX, R13  
+	MULXQ 112(SI), AX, R15;    ADCQ AX, R14  
+	MULXQ 120(SI), AX,  DX;    ADCQ AX, R15; MOVQ $0, AX
+	;;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX
+	ADDQ  64(DI),  R8;  MOVQ  R8,  64(DI)
+	ADCQ  72(DI),  R9;  MOVQ  R9,  72(DI)
+	ADCQ  80(DI), R10;  MOVQ R10,  80(DI)
+	ADCQ  88(DI), R11;  MOVQ R11,  88(DI)
+	ADCQ  96(DI), R12;  MOVQ R12,  96(DI)
+	ADCQ 104(DI), R13;  MOVQ R13, 104(DI)
+	ADCQ 112(DI), R14;  MOVQ R14, 112(DI)
+	ADCQ 120(DI), R15;  MOVQ R15, 120(DI)
+		             ;  MOVQ  DX, AX
+	MOVQ y+48(FP), DX
+	MULXQ 128(SI), R8,  R9;    ADCQ AX,  R8   
+	MULXQ 136(SI), AX, R10;    ADCQ AX,  R9  
+	MULXQ 144(SI), AX, R11;    ADCQ AX, R10  
+	MULXQ 152(SI), AX, R12;    ADCQ AX, R11  
+	MULXQ 160(SI), AX, R13;    ADCQ AX, R12  
+	MULXQ 168(SI), AX, R14;    ADCQ AX, R13  
+	MULXQ 176(SI), AX, R15;    ADCQ AX, R14  
+	MULXQ 184(SI), AX,  DX;    ADCQ AX, R15; MOVQ $0, AX
+	;;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX
+	;;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  AX
+	ADDQ 128(DI),  R8;  MOVQ  R8, 128(DI)
+	ADCQ 136(DI),  R9;  MOVQ  R9, 136(DI)
+	ADCQ 144(DI), R10;  MOVQ R10, 144(DI)
+	ADCQ 152(DI), R11;  MOVQ R11, 152(DI)
+	ADCQ 160(DI), R12;  MOVQ R12, 160(DI)
+	ADCQ 168(DI), R13;  MOVQ R13, 168(DI)
+	ADCQ 176(DI), R14;  MOVQ R14, 176(DI)
+	ADCQ 184(DI), R15;  MOVQ R15, 184(DI)
+	ADCQ 192(DI),  DX;  MOVQ  DX, 192(DI)
+	ADCQ      $0,  AX
+	
+	ADDQ $192, DI
+	ADDQ $192, SI
+	
+	MOVQ cin+56(FP), CX
+	ADDQ CX, DX
+	ADCQ $0, AX
+	MOVQ DX, 0(DI)
+	MOVQ AX, cout+64(FP)
+    
+L_END:
+	// Pop BP
+	MOVQ -8(SP), BP
+	RET  // End of intmadd64x1536 function
+	

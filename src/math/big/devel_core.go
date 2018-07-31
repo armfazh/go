@@ -22,13 +22,24 @@ func (z nat) montgomery512(x, y, m nat, k Word, n int) nat {
 		intmadd512x512(z, x, y)
 	case 16:
 		intmadd1024x1024(z, x, y)
+	case 24:
+		intmadd1536x1536(z, x, y)
 	case 32:
 		intmadd2048x2048(z, x, y)
 	}
 	var c Word
 	for i := 0; i < n; i++ {
 		t := z[i] * k
-		c = intmadd64x512(z[i:], m, t, n/8, c)
+		switch n {
+		case 8:
+			c = intmadd64x512(z[i:], m, t, c)
+		case 16:
+			c = intmadd64x1024(z[i:], m, t, c)
+		case 24:
+			c = intmadd64x1536(z[i:], m, t, c)
+		case 32:
+			c = 0 //intmadd64x2048(z[i:], m, t, c)
+		}
 	}
 	if c != 0 {
 		subVV(z[n:2*n], z[n:2*n], m)

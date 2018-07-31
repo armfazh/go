@@ -22,7 +22,15 @@ func intmadd1x512(z, x, y []Word) {
 	return
 }
 
-func intmadd64x512(z, x []Word, y Word, n int, cin Word) (cout Word) {
+func intmadd64x512(z, x []Word, y Word, cin Word) (cout Word) {
+	z[0] = x[0] + y
+	return cin + 5
+}
+func intmadd64x1024(z, x []Word, y Word, cin Word) (cout Word) {
+	z[0] = x[0] + y
+	return cin + 5
+}
+func intmadd64x1536(z, x []Word, y Word, cin Word) (cout Word) {
 	z[0] = x[0] + y
 	return cin + 5
 }
@@ -32,6 +40,10 @@ func intmadd512x512(z, x, y []Word) {
 	return
 }
 func intmadd1024x1024(z, x, y []Word) {
+	z[0] = x[0] + y[0]
+	return
+}
+func intmadd1536x1536(z, x, y []Word) {
 	z[0] = x[0] + y[0]
 	return
 }

@@ -27,6 +27,17 @@ func BenchmarkFazintmadd1024x1024(b *testing.B) {
 	}
 }
 
+func BenchmarkFazintmadd1536x1536(b *testing.B) {
+	n := 24
+	b.SetBytes(int64(n * 8))
+	x := rndV(n)
+	y := rndV(n)
+	z := nat(nil).make(2 * n)
+	for i := 0; i < b.N; i++ {
+		intmadd1536x1536(z, x, y)
+	}
+}
+
 func BenchmarkFazintmadd2048x2048(b *testing.B) {
 	n := 32
 	b.SetBytes(int64(n * 8))

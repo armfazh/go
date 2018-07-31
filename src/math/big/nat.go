@@ -207,11 +207,11 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	if len(x) != n || len(y) != n || len(m) != n {
 		panic("math/big: mismatched montgomery number lengths")
 	}
-//	switch n {
-//	case 8, 16, 32:
-//		z = z.montgomery512(x, y, m, k, n)
-//		return z
-//	}
+	switch n {
+	case 8, 16, 24:
+		z = z.montgomery512(x, y, m, k, n)
+		return z
+	}
 	z = z.make(n)
 	z.clear()
 	var c Word
