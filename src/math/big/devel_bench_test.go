@@ -50,7 +50,7 @@ func BenchmarkFazintmadd2048x2048(b *testing.B) {
 }
 
 func BenchmarkFazMontgomery(b *testing.B) {
-	var benchSizes = []int{8, 16, 32}
+	var benchSizes = []int{8, 16, 24, 32}
 	var k Word
 	k = (1 << 64) - 1
 	for _, n := range benchSizes {
@@ -68,7 +68,7 @@ func BenchmarkFazMontgomery(b *testing.B) {
 }
 
 func BenchmarkFazMontgomery512(b *testing.B) {
-	var benchSizes = []int{8, 16, 32}
+	var benchSizes = []int{8, 16, 24, 32}
 	var k Word
 	k = (1 << 64) - 1
 	for _, n := range benchSizes {

@@ -38,7 +38,7 @@ func (z nat) montgomery512(x, y, m nat, k Word, n int) nat {
 		case 24:
 			c = intmadd64x1536(z[i:], m, t, c)
 		case 32:
-			c = 0 //intmadd64x2048(z[i:], m, t, c)
+			c = intmadd64x2048(z[i:], m, t, c)
 		}
 	}
 	if c != 0 {
@@ -46,9 +46,4 @@ func (z nat) montgomery512(x, y, m nat, k Word, n int) nat {
 	}
 	z = z[n : 2*n]
 	return z
-}
-
-func intmadd2048x2048(z, x, y nat) {
-	//TODO
-	return
 }
