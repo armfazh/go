@@ -22,7 +22,12 @@ func intmadd1x512(z, x, y []Word) {
 	return
 }
 
-func intmul512xN(z, x, y []Word) {
+func intmadd64x512(z, x []Word, y Word, n int, cin Word) (cout Word) {
+	z[0] = x[0] + y
+	return cin + 5
+}
+
+func intmadd512x512(z, x, y []Word) {
 	z[0] = x[0] + y[0]
 	return
 }

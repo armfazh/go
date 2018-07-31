@@ -8,4 +8,6 @@ func intmaddNxN(z, x, y []Word)
 func addmulNxN(z, x, y []Word)
 func intmadd1x512(z, x, y []Word)
 
-func intmul512xN(z, x, y []Word) 
+// implemented using MULX
+func intmadd512x512(z, x, y []Word)
+func intmadd64x512(z, x []Word, y Word, n int, cin Word) (cout Word)

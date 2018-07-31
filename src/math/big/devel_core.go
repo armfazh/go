@@ -14,21 +14,35 @@ func (z nat) montgomery512(x, y, m nat, k Word, n int) nat {
 	// (required by addMulVVW and the for loop).
 	// It also assumes that x, y are already reduced mod m,
 	// or else the result will not be properly reduced.
-	if len(x) != n || len(y) != n || len(m) != n {
-		panic("math/big: mismatched montgomery number lengths")
-	}
-	z = z.make(2*n + 1)
+	z = z.make(2 * n)
 	z.clear()
 
-	intmaddNxN(z, x, y)
+	switch n {
+	case 8:
+		intmadd512x512(z, x, y)
+	case 16:
+		intmadd1024x1024(z, x, y)
+	case 32:
+		intmadd2048x2048(z, x, y)
+	}
+
 	var c Word
 	for i := 0; i < n; i++ {
 		t := z[i] * k
-		c = addMulVVW_unrolled(z[i:], m, t, c)
+		c = intmadd64x512(z[i:], m, t, n/8, c)
 	}
 	if c != 0 {
 		subVV(z[n:2*n], z[n:2*n], m)
 	}
 	z = z[n : 2*n]
 	return z
+}
+
+func intmadd1024x1024(z, x, y nat) {
+	//TODO
+	return
+}
+func intmadd2048x2048(z, x, y nat) {
+	//TODO
+	return
 }

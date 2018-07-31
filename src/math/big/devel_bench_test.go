@@ -5,8 +5,41 @@ import (
 	"testing"
 )
 
+func BenchmarkFazintmadd512x512(b *testing.B) {
+	n := 8
+	b.SetBytes(int64(n * 8))
+	x := rndV(n)
+	y := rndV(n)
+	z := nat(nil).make(2 * n)
+	for i := 0; i < b.N; i++ {
+		intmadd512x512(z, x, y)
+	}
+}
+
+func BenchmarkFazintmadd1024x1024(b *testing.B) {
+	n := 16
+	b.SetBytes(int64(n * 8))
+	x := rndV(n)
+	y := rndV(n)
+	z := nat(nil).make(2 * n)
+	for i := 0; i < b.N; i++ {
+		intmadd1024x1024(z, x, y)
+	}
+}
+
+func BenchmarkFazintmadd2048x2048(b *testing.B) {
+	n := 32
+	b.SetBytes(int64(n * 8))
+	x := rndV(n)
+	y := rndV(n)
+	z := nat(nil).make(2 * n)
+	for i := 0; i < b.N; i++ {
+		intmadd2048x2048(z, x, y)
+	}
+}
+
 func BenchmarkFazMontgomery(b *testing.B) {
-	var benchSizes = []int{8, 16, 24, 32}
+	var benchSizes = []int{8, 16, 32}
 	var k Word
 	k = (1 << 64) - 1
 	for _, n := range benchSizes {
@@ -24,7 +57,7 @@ func BenchmarkFazMontgomery(b *testing.B) {
 }
 
 func BenchmarkFazMontgomery512(b *testing.B) {
-	var benchSizes = []int{8, 16, 24, 32}
+	var benchSizes = []int{8, 16, 32}
 	var k Word
 	k = (1 << 64) - 1
 	for _, n := range benchSizes {
@@ -191,23 +224,6 @@ func BenchmarkFazAddMulVVW(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {
 				addMulVVW(z, x, y)
-			}
-		})
-	}
-}
-
-func BenchmarkFazintmul512xN(b *testing.B) {
-	//	var benchSizes = []int{1, 2, 3, 4, 5, 1e1, 1e2, 1e3, 1e4, 1e5}
-	var benchSizes = []int{8, 16, 24, 32}
-
-	for _, n := range benchSizes {
-		x := rndV(n)
-		y := rndV(n)
-		z := make([]Word, len(x)+len(y))
-		b.Run(fmt.Sprint(n), func(b *testing.B) {
-			b.SetBytes(int64(n * _W))
-			for i := 0; i < b.N; i++ {
-				intmul512xN(z, x, y)
 			}
 		})
 	}

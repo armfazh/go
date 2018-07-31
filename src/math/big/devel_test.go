@@ -10,68 +10,6 @@ import (
 	//	"testing/quick"
 )
 
-func TestMontgomery512(t *testing.T) {
-	one := NewInt(1)
-	_B := new(Int).Lsh(one, _W)
-	for i, test := range montgomeryTests {
-		x := natFromString(test.x)
-		y := natFromString(test.y)
-		m := natFromString(test.m)
-		for len(x) < len(m) {
-			x = append(x, 0)
-		}
-		for len(y) < len(m) {
-			y = append(y, 0)
-		}
-
-		if x.cmp(m) > 0 {
-			_, r := nat(nil).div(nil, x, m)
-			t.Errorf("#%d: x > m (0x%s > 0x%s; use 0x%s)", i, x.utoa(16), m.utoa(16), r.utoa(16))
-		}
-		if y.cmp(m) > 0 {
-			_, r := nat(nil).div(nil, x, m)
-			t.Errorf("#%d: y > m (0x%s > 0x%s; use 0x%s)", i, y.utoa(16), m.utoa(16), r.utoa(16))
-		}
-
-		var out nat
-		if _W == 32 {
-			out = natFromString(test.out32)
-		} else {
-			out = natFromString(test.out64)
-		}
-
-		// t.Logf("#%d: len=%d\n", i, len(m))
-
-		// check output in table
-		xi := &Int{abs: x}
-		yi := &Int{abs: y}
-		mi := &Int{abs: m}
-		p := new(Int).Mod(new(Int).Mul(xi, new(Int).Mul(yi, new(Int).ModInverse(new(Int).Lsh(one, uint(len(m))*_W), mi))), mi)
-		if out.cmp(p.abs.norm()) != 0 {
-			t.Errorf("#%d: out in table=0x%s, computed=0x%s", i, out.utoa(16), p.abs.norm().utoa(16))
-		}
-
-		// check k0 in table
-		k := new(Int).Mod(&Int{abs: m}, _B)
-		k = new(Int).Sub(_B, k)
-		k = new(Int).Mod(k, _B)
-		k0 := Word(new(Int).ModInverse(k, _B).Uint64())
-		if k0 != Word(test.k0) {
-			t.Errorf("#%d: k0 in table=%#x, computed=%#x\n", i, test.k0, k0)
-		}
-
-		// check montgomery with correct k0 produces correct output
-		z := nat(nil).montgomery512(x, y, m, k0, len(m))
-		z = z.norm()
-		if z.cmp(out) != 0 {
-			t.Errorf("#%d: got 0x%s want 0x%s", i, z.utoa(16), out.utoa(16))
-			z.PrintHex()			
-			out.PrintHex()
-		}
-	}
-}
-
-
 var devel_expTests = []struct {
 	x, y, m string
 	out     string

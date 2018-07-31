@@ -1,153 +1,114 @@
 // +build !math_big_pure_go
 
 #include "textflag.h"
+
+#define MADD64x512 \
+	MULXQ  0(SI), R8,  R9;      \
+	MULXQ  8(SI), AX, R10;    ADDQ AX,  R9  \
+	MULXQ 16(SI), AX, R11;    ADCQ AX, R10  \
+	MULXQ 24(SI), AX, R12;    ADCQ AX, R11  \
+	MULXQ 32(SI), AX, R13;    ADCQ AX, R12  \
+	MULXQ 40(SI), AX, R14;    ADCQ AX, R13  \
+	MULXQ 48(SI), AX, R15;    ADCQ AX, R14  \
+	MULXQ 56(SI), AX,  DX;    ADCQ AX, R15  \
+	;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX  \
+	ADDQ  0(DI),  R8;  MOVQ  R8,  0(DI) \
+	ADCQ  8(DI),  R9;  MOVQ  R9,  8(DI) \
+	ADCQ 16(DI), R10;  MOVQ R10, 16(DI) \
+	ADCQ 24(DI), R11;  MOVQ R11, 24(DI) \
+	ADCQ 32(DI), R12;  MOVQ R12, 32(DI) \
+	ADCQ 40(DI), R13;  MOVQ R13, 40(DI) \
+	ADCQ 48(DI), R14;  MOVQ R14, 48(DI) \
+	ADCQ 56(DI), R15;  MOVQ R15, 56(DI) \
+	ADCQ 64(DI),  DX;  MOVQ  DX, 64(DI) \
 	
 
-// func intmul512xN(z, x, y []Word) 
-TEXT ·intmul512xN(SB),NOSPLIT,$40
+// func intmadd512x512(z, x, y []Word)
+TEXT ·intmadd512x512(SB),NOSPLIT,$8
 	// Push BP
 	MOVQ BP, -8(SP)
 	
-	//Early return cases
-	// a) if len(x) == 0 then goto END
+	//Early return 
+	// if len(x) == 0 OR len(y) == 0 then goto END
 	MOVQ x_len+32(FP), AX
-	CMPQ AX, $0
-	JE L_END
-	// b) if len(y) == 0 then goto END
-	MOVQ y_len+56(FP), AX
-	CMPQ AX, $0
-	JE L_END
+	MOVQ y_len+56(FP), DX
+	ANDQ DX, AX
+	JZ L_END
 	
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
-	
-	
-
-L_START_Y:
 	MOVQ y+48(FP), BP
 	
-	MOVQ  0(DI), R8
-	MOVQ  8(DI), R9
-	MOVQ 16(DI), R10
-	MOVQ 24(DI), R11
-	MOVQ 32(DI), R12
-	MOVQ 40(DI), R13
-	MOVQ 48(DI), R14
-	MOVQ 56(DI), R15
-	
-	//Save len(y) in -24(SP)
-	MOVQ y_len+56(FP), AX
-	MOVQ AX, -24(SP)
-	
-// While ( 0 < len(y) ) then loop CX=min(8,len(y)) times
-L_Y_NTIMES:
 	MOVQ $8, CX
-	CMPQ AX, CX
-	CMOVQLT AX, CX
-	
-	SUBQ CX, AX
-	MOVQ AX, -24(SP)
-
 L_X_8TIMES:
-	MOVQ (BP), BX
-	MOVQ (SI), AX
-	MULQ BX
-	ADDQ AX, R8
-	MOVQ R8, (DI)
-	MOVQ DX, R8
-	ADCQ $0, R8
-
-	MOVQ 8(SI), AX
-	MULQ BX
-	ADDQ AX, R9
-	ADCQ $0, DX
-	ADDQ R9, R8
-	MOVQ DX, R9
-	ADCQ $0, R9
-
-	MOVQ 16(SI), AX
-	MULQ BX
-	ADDQ AX, R10
-	ADCQ $0, DX
-	ADDQ R10, R9
-	MOVQ DX, R10
-	ADCQ $0, R10
-
-	MOVQ 24(SI), AX
-	MULQ BX
-	ADDQ AX, R11
-	ADCQ $0, DX
-	ADDQ R11, R10
-	MOVQ DX, R11
-	ADCQ $0, R11
-
-	MOVQ 32(SI), AX
-	MULQ BX
-	ADDQ AX, R12
-	ADCQ $0, DX
-	ADDQ R12, R11
-	MOVQ DX, R12
-	ADCQ $0, R12
-
-	MOVQ 40(SI), AX
-	MULQ BX
-	ADDQ AX, R13
-	ADCQ $0, DX
-	ADDQ R13, R12
-	MOVQ DX, R13
-	ADCQ $0, R13
-
-	MOVQ 48(SI), AX
-	MULQ BX
-	ADDQ AX, R14
-	ADCQ $0, DX
-	ADDQ R14, R13
-	MOVQ DX, R14
-	ADCQ $0, R14
-
-	MOVQ 56(SI), AX
-	MULQ BX
-	ADDQ AX, R15
-	ADCQ $0, DX
-	ADDQ R15, R14
-	MOVQ DX, R15
-	ADCQ $0, R15
-	
-	ADDQ $8, BP
+	MOVQ 0(BP), DX
+	MADD64x512
 	ADDQ $8, DI
-
+	ADDQ $8, BP
 	SUBQ $1, CX
-	JNZ L_X_8TIMES
+	JNZ	L_X_8TIMES
+    
+L_END:
+	// Pop BP
+	MOVQ -8(SP), BP
+	RET   // End of intmadd512x512 function
+
+
+
+/////////////////////////////////////////////////
+// func intmadd64x512(z, x []Word, y Word, n int, cin Word) (cout Word)
+TEXT ·intmadd64x512(SB),NOSPLIT,$8
+	// Push BP
+	MOVQ BP, -8(SP)
 	
-	ADDQ  0(DI),  R8
-	ADCQ  8(DI),  R9
-	ADCQ 16(DI), R10
-	ADCQ 24(DI), R11
-	ADCQ 32(DI), R12
-	ADCQ 40(DI), R13
-	ADCQ 48(DI), R14
-	ADCQ 56(DI), R15
-	
-	MOVQ -24(SP), AX
+	//Early return 
+	// if len(x) == 0 then goto END
+	MOVQ x_len+32(FP), AX
 	CMPQ AX, $0
-	JNZ L_Y_NTIMES
+	JEQ L_END
+	
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI
+	MOVQ n+56(FP), CX
+	
+	MOVQ $0, AX
+	
+L_X_NTIMES:
+	MOVQ y+48(FP), DX
+	MULXQ  0(SI), R8,  R9;    ADDQ AX,  R8
+	MULXQ  8(SI), AX, R10;    ADCQ AX,  R9
+	MULXQ 16(SI), AX, R11;    ADCQ AX, R10
+	MULXQ 24(SI), AX, R12;    ADCQ AX, R11
+	MULXQ 32(SI), AX, R13;    ADCQ AX, R12
+	MULXQ 40(SI), AX, R14;    ADCQ AX, R13  
+	MULXQ 48(SI), AX, R15;    ADCQ AX, R14
+	MULXQ 56(SI), AX,  DX;    ADCQ AX, R15
+	;;;;;;;;;;;;;;;;;;;;;;    ADCQ $0,  DX
+	XORQ AX, AX
+	ADDQ  0(DI),  R8;  MOVQ  R8,  0(DI) 
+	ADCQ  8(DI),  R9;  MOVQ  R9,  8(DI) 
+	ADCQ 16(DI), R10;  MOVQ R10, 16(DI) 
+	ADCQ 24(DI), R11;  MOVQ R11, 24(DI) 
+	ADCQ 32(DI), R12;  MOVQ R12, 32(DI) 
+	ADCQ 40(DI), R13;  MOVQ R13, 40(DI) 
+	ADCQ 48(DI), R14;  MOVQ R14, 48(DI) 
+	ADCQ 56(DI), R15;  MOVQ R15, 56(DI)
+	ADCQ 64(DI),  DX;  MOVQ  DX, 64(DI)
+	ADCQ     $0,  AX;
 
-    MOVQ  R8,  0(DI)
-	MOVQ  R9,  8(DI)
-	MOVQ R10, 16(DI)
-	MOVQ R11, 24(DI)
-	MOVQ R12, 32(DI)
-	MOVQ R13, 40(DI)
-	MOVQ R14, 48(DI)
-	MOVQ R15, 56(DI)
-L_END_Y:
-
-
-
+	ADDQ $64, DI
+	ADDQ $64, SI
+	SUBQ $1, CX
+	JNZ	L_X_NTIMES
+	
+	MOVQ cin+64(FP), CX
+	ADDQ CX, DX
+	ADCQ $0, AX
+	MOVQ DX, 0(DI)
+	MOVQ AX, cout+72(FP)
+    
 L_END:
 	// Pop BP
 	MOVQ -8(SP), BP
 	RET
-
-
 
