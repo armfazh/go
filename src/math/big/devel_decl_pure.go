@@ -31,3 +31,7 @@ func intmadd512x512(z, x, y []Word) {
 	z[0] = x[0] + y[0]
 	return
 }
+func intmadd1024x1024(z, x, y []Word) {
+	z[0] = x[0] + y[0]
+	return
+}

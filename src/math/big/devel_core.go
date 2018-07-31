@@ -26,22 +26,18 @@ func (z nat) montgomery512(x, y, m nat, k Word, n int) nat {
 		intmadd2048x2048(z, x, y)
 	}
 
-	var c Word
-	for i := 0; i < n; i++ {
-		t := z[i] * k
-		c = intmadd64x512(z[i:], m, t, n/8, c)
-	}
-	if c != 0 {
-		subVV(z[n:2*n], z[n:2*n], m)
-	}
-	z = z[n : 2*n]
+	//	var c Word
+	//	for i := 0; i < n; i++ {
+	//		t := z[i] * k
+	//		c = intmadd64x512(z[i:], m, t, n/8, c)
+	//	}
+	//	if c != 0 {
+	//		subVV(z[n:2*n], z[n:2*n], m)
+	//	}
+	//	z = z[n : 2*n]
 	return z
 }
 
-func intmadd1024x1024(z, x, y nat) {
-	//TODO
-	return
-}
 func intmadd2048x2048(z, x, y nat) {
 	//TODO
 	return
