@@ -39,6 +39,10 @@ func intmadd64x2048(z, x []Word, y Word, cin Word) (cout Word) {
 	return cin + 5
 }
 
+func intmadd512Nx512N(z, x, y []Word) {
+	z[0] = x[0] + y[0]
+	return
+}
 func intmadd512x512(z, x, y []Word) {
 	z[0] = x[0] + y[0]
 	return

@@ -17,16 +17,17 @@ func (z nat) montgomery512(x, y, m nat, k Word, n int) nat {
 	z = z.make(2 * n)
 	z.clear()
 
-	switch n {
-	case 8:
-		intmadd512x512(z, x[:3], y)
-	case 16:
-		intmadd1024x1024(z, x, y)
-	case 24:
-		intmadd1536x1536(z, x, y)
-	case 32:
-		intmadd2048x2048(z, x, y)
-	}
+	//	switch n {
+	//	case 8:
+	//		intmadd512x512(z, x[:3], y)
+	//	case 16:
+	//		intmadd1024x1024(z, x, y)
+	//	case 24:
+	//		intmadd1536x1536(z, x, y)
+	//	case 32:
+	//		intmadd2048x2048(z, x, y)
+	//	}
+	intmadd512Nx512N(z, x, y)
 	var c Word
 	for i := 0; i < n; i++ {
 		t := z[i] * k
