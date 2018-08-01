@@ -83,8 +83,7 @@ func BenchmarkFazMontgomery(b *testing.B) {
 	}
 }
 
-
-func BenchmarkFazMontgomery512(b *testing.B) {
+func BenchmarkFazMontgomery8x(b *testing.B) {
 	var benchSizes = []int{8, 16, 24, 32}
 	var k Word
 	k = (1 << 64) - 1
@@ -96,7 +95,7 @@ func BenchmarkFazMontgomery512(b *testing.B) {
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {
-				z.montgomery512(mulx, muly, mod, k, n)
+				z.montgomery8x(mulx, muly, mod, k, n)
 			}
 		})
 	}

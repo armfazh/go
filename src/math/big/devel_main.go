@@ -70,11 +70,14 @@ func test_montgo() {
 
 	var k0 Word
 	k0 = 0xffffffffffffffff
-	var z nat
-	z = nat(nil).montgomery(x, y, m, k0, n)
+	var z, f nat
+	z.make(len(x) + len(y))
+	f.make(len(x) + len(y))
+
+	z = z.montgomery(x, y, m, k0, n)
 	z.PrintHex()
 
-	f := nat(nil).montgomery512(x, y, m, k0, n)
+	f = f.montgomery8x(x, y, m, k0, n)
 	f.PrintHex()
 
 	if z.cmp(f) != 0 {
