@@ -2,13 +2,7 @@
 
 #include "textflag.h"
 
-
-
-////////////////////////////////////////////////
-//   n=512N bits
-////////////////////////////////////////////////
 #define MUL64x512N  \
-	MOVQ 0(BP), DX  \
 	MULXQ  0(SI), AX,  R9;  ADCQ AX,  R8;  MOVQ  R8,  0(DI)  \
 	MULXQ  8(SI), AX, R10;  ADCQ AX,  R9;  MOVQ  R9,  8(DI)  \
 	MULXQ 16(SI), AX, R11;  ADCQ AX, R10;  MOVQ R10, 16(DI)  \
@@ -37,7 +31,7 @@
 	ADCQ 40(DI), R13;  MOVQ R13, 40(DI)  \
 	ADCQ 48(DI), R14;  MOVQ R14, 48(DI)  \
 	ADCQ 56(DI), R15;  MOVQ R15, 56(DI)  \
-	;;;;;;;;;;;;;;;;;  MOVQ  DX, R8 
+	;;;;;;;;;;;;;;;;;  MOVQ  DX, R8
 
 // func intmadd512Nx512N(z, x, y []Word)
 TEXT ·intmadd512Nx512N(SB),NOSPLIT,$0
@@ -56,6 +50,7 @@ TEXT ·intmadd512Nx512N(SB),NOSPLIT,$0
 	SHRQ $3, BX
 	XORQ R8, R8
 	L_X1TIMES:
+		MOVQ 0(BP), DX
 		MUL64x512N
 		LEAQ 64(SI), SI
 		LEAQ 64(DI), DI
@@ -98,22 +93,57 @@ L_END:
 
 
 /////////////////////////////////////////////////
-// func intmadd64x512N(z, x []Word, y Word, cin Word) (cout Word)
+// func intmadd64x512N(z, x []Word, k Word) (cout Word)
 TEXT ·intmadd64x512N(SB),NOSPLIT,$8	
+	MOVQ $0, cout+56(FP)
 	//Early return 
 	// if len(x) == 0 then goto END
 	MOVQ x_len+32(FP), AX
 	CMPQ AX, $0
 	JEQ L_END
-	
+		
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
+	
+	MOVQ x_len+32(FP), BX
+	SHRQ $3, BX
+	MOVQ k+48(FP), AX
+	MULQ (DI)
+	MOVQ AX, BP
+	XORQ R8, R8
+	L_X1TIMES:
+		MOVQ BP, DX
+		MUL64x512N
+		LEAQ 64(SI), SI
+		LEAQ 64(DI), DI
+		DECQ BX
+	JNZ L_X1TIMES
+	MOVQ $0, AX
+	ADCQ 0(DI), R8
+	ADCQ $0, AX
+	ADDQ cout+56(FP), R8
+	ADCQ $0, AX
+	MOVQ R8, 0(DI)
+	MOVQ AX, cout+56(FP)
+	
+	MOVQ x_len+32(FP), CX
+	DECQ CX
+	
+L_NTIMES	:
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI
+	MOVQ x_len+32(FP), AX
+	SUBQ CX, AX
+	LEAQ (DI)(AX*8), DI
 
 	MOVQ x_len+32(FP), BX
 	SHRQ $3, BX
+	MOVQ k+48(FP), AX
+	MULQ (DI)
+	MOVQ AX, BP
 	XORQ R8, R8
-L_XTIMES:
-		MOVQ y+48(FP), DX
+	L_XTIMES:
+		MOVQ BP, DX
 		MADD64x512N
 		LEAQ 64(SI), SI
 		LEAQ 64(DI), DI
@@ -122,10 +152,14 @@ L_XTIMES:
 	MOVQ $0, AX
 	ADCQ 0(DI), R8
 	ADCQ $0, AX
-	ADDQ cin+56(FP), R8
+	ADDQ cout+56(FP), R8
 	ADCQ $0, AX
 	MOVQ R8, 0(DI)
-	MOVQ AX, cout+64(FP)
+	MOVQ AX, cout+56(FP)
+	
+	DECQ CX
+	JNZ L_NTIMES	
+		
 L_END:
 	RET // End of intmadd64x512N
 

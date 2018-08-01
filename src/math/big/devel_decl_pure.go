@@ -22,8 +22,8 @@ func intmadd1x512(z, x, y []Word) {
 	return
 }
 
-func intmadd64x512N(z, x []Word, y Word, cin Word) (cout Word) {
-	z[0] = x[0] + y
+func intmadd64x512N(z, x []Word, k Word) (cout Word) {
+	z[0] = x[0] + k
 	return cin + 5
 }
 

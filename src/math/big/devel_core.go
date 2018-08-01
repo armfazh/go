@@ -17,11 +17,7 @@ func (z nat) montgomery8x(x, y, m nat, k Word, n int) nat {
 	z = z.make(2 * n)
 	z.clear()
 	intmadd512Nx512N(z, x, y)
-	var c Word
-	for i := 0; i < n; i++ {
-		t := z[i] * k
-		c = intmadd64x512N(z[i:], m, t, c)
-	}
+	c := intmadd64x512N(z, m, k)
 	if c != 0 {
 		subVV(z[n:2*n], z[n:2*n], m)
 	}

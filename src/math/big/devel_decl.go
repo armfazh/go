@@ -21,4 +21,4 @@ func intmadd64x1024(z, x []Word, y Word, cin Word) (cout Word)
 func intmadd64x1536(z, x []Word, y Word, cin Word) (cout Word)
 func intmadd64x2048(z, x []Word, y Word, cin Word) (cout Word)
 
-func intmadd64x512N(z, x []Word, y Word, cin Word) (cout Word)
+func intmadd64x512N(z, x []Word, k Word) (cout Word)
