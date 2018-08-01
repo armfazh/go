@@ -19,7 +19,7 @@ func (z nat) montgomery512(x, y, m nat, k Word, n int) nat {
 
 	switch n {
 	case 8:
-		intmadd512x512(z, x, y)
+		intmadd512x512(z, x[:3], y)
 	case 16:
 		intmadd1024x1024(z, x, y)
 	case 24:
