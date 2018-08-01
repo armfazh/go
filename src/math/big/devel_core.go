@@ -20,16 +20,7 @@ func (z nat) montgomery8x(x, y, m nat, k Word, n int) nat {
 	var c Word
 	for i := 0; i < n; i++ {
 		t := z[i] * k
-		switch n {
-		case 8:
-			c = intmadd64x512(z[i:], m, t, c)
-		case 16:
-			c = intmadd64x1024(z[i:], m, t, c)
-		case 24:
-			c = intmadd64x1536(z[i:], m, t, c)
-		case 32:
-			c = intmadd64x2048(z[i:], m, t, c)
-		}
+		c = intmadd64x512N(z[i:], m, t, c)
 	}
 	if c != 0 {
 		subVV(z[n:2*n], z[n:2*n], m)

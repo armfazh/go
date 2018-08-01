@@ -207,10 +207,10 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	if len(x) != n || len(y) != n || len(m) != n {
 		panic("math/big: mismatched montgomery number lengths")
 	}
-	if n%8 == 0 {
-		z = z.montgomery8x(x, y, m, k, n)
-		return z
-	}
+	//		if n%8 == 0 {
+	//			z = z.montgomery8x(x, y, m, k, n)
+	//			return z
+	//		}
 	z = z.make(n)
 	z.clear()
 	var c Word
