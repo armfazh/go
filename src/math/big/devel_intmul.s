@@ -58,7 +58,7 @@ TEXT ·intmadd512Nx512N(SB),NOSPLIT,$0
 	JNZ	L_X1TIMES
 	ADCQ $0, R8
 	MOVQ R8, 0(DI)
-		
+
 	MOVQ y_len+56(FP), CX
 	SUBQ $1, CX
 	
@@ -89,46 +89,17 @@ L_YTIMES:
 L_END:
 	RET   // End of intmadd512Nx512N function
 
-
-
-
 /////////////////////////////////////////////////
 // func intmadd64x512N(z, x []Word, k Word) (cout Word)
-TEXT ·intmadd64x512N(SB),NOSPLIT,$8	
+TEXT ·intmadd64x512N(SB),NOSPLIT,$0
 	MOVQ $0, cout+56(FP)
 	//Early return 
 	// if len(x) == 0 then goto END
 	MOVQ x_len+32(FP), AX
 	CMPQ AX, $0
 	JEQ L_END
-		
-	MOVQ z+ 0(FP), DI
-	MOVQ x+24(FP), SI
-	
-	MOVQ x_len+32(FP), BX
-	SHRQ $3, BX
-	MOVQ k+48(FP), AX
-	MULQ (DI)
-	MOVQ AX, BP
-	XORQ R8, R8
-	L_X1TIMES:
-		MOVQ BP, DX
-		MUL64x512N
-		LEAQ 64(SI), SI
-		LEAQ 64(DI), DI
-		DECQ BX
-	JNZ L_X1TIMES
-	MOVQ $0, AX
-	ADCQ 0(DI), R8
-	ADCQ $0, AX
-	ADDQ cout+56(FP), R8
-	ADCQ $0, AX
-	MOVQ R8, 0(DI)
-	MOVQ AX, cout+56(FP)
-	
+
 	MOVQ x_len+32(FP), CX
-	DECQ CX
-	
 L_NTIMES	:
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
