@@ -27,40 +27,7 @@ func intmadd64x512N(z, x []Word, k Word) (cout Word) {
 	return cout + 5
 }
 
-func intmadd64x512(z, x []Word, y Word, cin Word) (cout Word) {
-	z[0] = x[0] + y
-	return cin + 5
-}
-func intmadd64x1024(z, x []Word, y Word, cin Word) (cout Word) {
-	z[0] = x[0] + y
-	return cin + 5
-}
-func intmadd64x1536(z, x []Word, y Word, cin Word) (cout Word) {
-	z[0] = x[0] + y
-	return cin + 5
-}
-func intmadd64x2048(z, x []Word, y Word, cin Word) (cout Word) {
-	z[0] = x[0] + y
-	return cin + 5
-}
-
 func intmadd512Nx512N(z, x, y []Word) {
-	z[0] = x[0] + y[0]
-	return
-}
-func intmadd512x512(z, x, y []Word) {
-	z[0] = x[0] + y[0]
-	return
-}
-func intmadd1024x1024(z, x, y []Word) {
-	z[0] = x[0] + y[0]
-	return
-}
-func intmadd1536x1536(z, x, y []Word) {
-	z[0] = x[0] + y[0]
-	return
-}
-func intmadd2048x2048(z, x, y []Word) {
 	z[0] = x[0] + y[0]
 	return
 }

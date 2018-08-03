@@ -33,7 +33,7 @@ func intmult(z, x, y nat) {
 	//	zz.PrintHex()
 
 	//	intmaddNxN(z, x, y)
-	intmadd1x512(z, x[:16], y)
+	//	intmadd1x512(z, x[:16], y)
 
 	//	for i, v := range z {
 	//		if v != zz[i] {
