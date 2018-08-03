@@ -207,26 +207,30 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	if len(x) != n || len(y) != n || len(m) != n {
 		panic("math/big: mismatched montgomery number lengths")
 	}
-	if n > 0 && n%8 == 0 {
-		z = z.montgomery8x(x, y, m, k, n)
-		return z
-	}
-	z = z.make(n)
-	z.clear()
 	var c Word
-	for i := 0; i < n; i++ {
-		d := y[i]
-		c2 := addMulVVW(z, x, d)
-		t := z[0] * k
-		c3 := addMulVVW(z, m, t)
-		copy(z, z[1:])
-		cx := c + c2
-		cy := cx + c3
-		z[n-1] = cy
-		if cx < c2 || cy < c3 {
-			c = 1
-		} else {
-			c = 0
+	if n > 0 && n%8 == 0 {
+		z = z.make(2 * n)
+		z.clear()
+		intmul512Nx512N(z, x, y)
+		c = redMontgomery512N(z, m, k)
+		z = z[n:]
+	} else {
+		z = z.make(n)
+		z.clear()
+		for i := 0; i < n; i++ {
+			d := y[i]
+			c2 := addMulVVW(z, x, d)
+			t := z[0] * k
+			c3 := addMulVVW(z, m, t)
+			copy(z, z[1:])
+			cx := c + c2
+			cy := cx + c3
+			z[n-1] = cy
+			if cx < c2 || cy < c3 {
+				c = 1
+			} else {
+				c = 0
+			}
 		}
 	}
 	if c != 0 {
