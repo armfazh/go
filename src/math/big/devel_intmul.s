@@ -36,40 +36,57 @@
 // func intmadd512Nx512N(z, x, y []Word)
 TEXT ·intmadd512Nx512N(SB),NOSPLIT,$0
 	//Early return 
-	// if len(x) == 0 OR len(y) == 0 then goto END
-	MOVQ x_len+32(FP), AX
+	// if len(x) == 0 then goto END
+	MOVQ x_len+32(FP), DX
+	CMPQ DX, $0
+	JEQ L_END
+	
+	// if len(y) == 0 then goto END
 	MOVQ y_len+56(FP), DX
-	ANDQ DX, AX
-	JZ L_END
+	CMPQ DX, $0
+	JEQ L_END
 
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
 	MOVQ y+48(FP), BP
-	
+		
+	MOVQ $0, R8
 	MOVQ x_len+32(FP), BX
-	ANDQ $0x7, BX
-	XORQ R8, R8
-	L_X1:	
-		MULXQ 0(SI), AX, R9;  ADCQ AX, R8;  MOVQ R8, 0(DI); MOVQ  R9, R8 
-		LEAQ 8(SI), SI
-		LEAQ 8(DI), DI
-		DECQ BX
-	JNZ	L_X1TIMES
-	MOVQ x_len+32(FP), BX
-	MOVQ $3, AX
-	SHRXQ AX, BX, BX
-	L_X1TIMES:
+	SHRQ $3, BX
+	JZ L_X8_Y1_END
+	CLC
+	L_X1TIMES_START:
 		MOVQ 0(BP), DX
 		MUL64x512N
 		LEAQ 64(SI), SI
 		LEAQ 64(DI), DI
 		DECQ BX
-	JNZ	L_X1TIMES
+	JNZ L_X1TIMES_START
 	ADCQ $0, R8
-	MOVQ R8, 0(DI)
-	RET
+	L_X8_Y1_END:
+		
+	MOVQ x_len+32(FP), BX
+	ANDQ $0x7, BX
+	JZ L_X1_Y1_END
+
+	MOVQ 0(BP), DX
+	CLC
+	L_X1_Y1_START:
+		MULXQ 0(SI), AX, R9
+		ADCQ AX, R8
+		MOVQ R8, 0(DI)
+		MOVQ R9, R8 
+		LEAQ 8(SI), SI
+		LEAQ 8(DI), DI
+		DECQ BX
+	JNZ	L_X1_Y1_START
+	ADCQ $0, R8
+	L_X1_Y1_END:
+	MOVQ R8, 0(DI)	
+	
 	MOVQ y_len+56(FP), CX
 	SUBQ $1, CX
+	JZ L_END
 	
 L_YTIMES:
 	MOVQ z+ 0(FP), DI
@@ -80,17 +97,40 @@ L_YTIMES:
 	LEAQ (DI)(AX*8), DI
 	LEAQ (BP)(AX*8), BP
 	
+	MOVQ $0, R8
 	MOVQ x_len+32(FP), BX
 	SHRQ $3, BX
-	XORQ R8, R8
-	L_XTIMES:
+	JZ L_X8_END
+	CLC
+	L_X8_START:
 		MOVQ 0(BP), DX
 		MADD64x512N
 		LEAQ 64(SI), SI
 		LEAQ 64(DI), DI
 		DECQ BX
-	JNZ	L_XTIMES
+	JNZ L_X8_START
 	ADCQ $0, R8
+	L_X8_END:
+		
+	MOVQ x_len+32(FP), BX
+	ANDQ $0x7, BX
+	JZ L_X_END
+
+	MOVQ 0(BP), DX
+	CLC
+	L_X1_START:
+		MULXQ 0(SI), AX, R9
+		ADCQ AX, R8
+		ADCQ $0, R9
+		ADDQ 0(DI), R8 
+		MOVQ R8, 0(DI)
+		MOVQ R9, R8
+		LEAQ 8(SI), SI
+		LEAQ 8(DI), DI
+		DECQ BX
+	JNZ	L_X1_START
+	ADCQ $0, R8
+	L_X_END:
 	MOVQ R8, 0(DI)
 	
 	DECQ CX
@@ -116,24 +156,51 @@ L_NTIMES	:
 	SUBQ CX, AX
 	LEAQ (DI)(AX*8), DI
 
-	MOVQ x_len+32(FP), BX
-	SHRQ $3, BX
 	MOVQ k+48(FP), AX
 	MULQ (DI)
 	MOVQ AX, BP
-	XORQ R8, R8
-	L_XTIMES:
+	
+	MOVQ $0, R8
+	MOVQ x_len+32(FP), BX
+	SHRQ $3, BX
+	JZ L_X8_END
+	
+	CLC
+	L_X8_START:
 		MOVQ BP, DX
 		MADD64x512N
 		LEAQ 64(SI), SI
 		LEAQ 64(DI), DI
 		DECQ BX
-	JNZ L_XTIMES
+	JNZ L_X8_START
+	ADCQ $0, R8
+	L_X8_END:
+	
+	MOVQ x_len+32(FP), BX
+	ANDQ $0x7, BX
+	JZ L_X_END
+
+	MOVQ BP, DX
+	CLC
+	L_X1_START:
+		MULXQ 0(SI), AX, R9
+		ADCQ AX, R8
+		ADCQ $0, R9
+		ADDQ 0(DI), R8 
+		MOVQ R8, 0(DI)
+		MOVQ R9, R8
+		LEAQ 8(SI), SI
+		LEAQ 8(DI), DI
+		DECQ BX
+	JNZ	L_X1_START
+	ADCQ $0, R8
+	L_X_END:
 	MOVQ $0, AX
 	ADCQ 0(DI), R8
 	ADCQ $0, AX
+		
 	ADDQ cout+56(FP), R8
-	ADCQ $0, AX
+	ADCQ $0, AX	
 	MOVQ R8, 0(DI)
 	MOVQ AX, cout+56(FP)
 	

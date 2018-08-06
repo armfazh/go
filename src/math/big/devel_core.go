@@ -15,7 +15,7 @@ func (z nat) montgomery8x(x, y, m nat, k Word, n int) nat {
 	// It also assumes that x, y are already reduced mod m,
 	// or else the result will not be properly reduced.
 	z = z.make(2 * n)
-	z.clear()
+//	z.clear()
 	intmadd512Nx512N(z, x, y)
 	c := intmadd64x512N(z, m, k)
 	if c != 0 {
