@@ -49,7 +49,7 @@ func test_montgo() {
 	//		m := natFromString2("0x200803d34e9ba567304ee5c4f89b9cb1478aabd4f92bfb597a71390caca3cfe5b1f1b3f1dd380e5c72b84bc6c318b798c4515726cb457a2051fdf7607732c464d166120eb83dc0e078ced8dae9e056d81b304a9de03bf125cdbd3f91d165e088553ff36650c1b7ef8660de2840d7db23b0aa3df6c5d5ebacbd40bd7541bda6272bff6f5116b82fbeb2fbfcd5e9a3c1bb755a2d2c1fcb04878f1de4fccd5c82203daab35854cb71073eed4b7e3c47fff2c242f8b5e2356247862e419335a4c509e9ef28a5491ed79996bde1cab9ad0c481c22ef50afa63eeeb377590ab16d9d7a4de1ab952e8cc564e603db8544d2abd7c8a026f7415dac4b6a253991926e586b")
 	//		n:=len(m)
 
-	n := 6
+	n := 19
 	x := nat(nil).make(n)
 	y := nat(nil).make(n)
 	m := nat(nil).make(n)
