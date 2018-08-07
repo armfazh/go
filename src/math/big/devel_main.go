@@ -93,23 +93,36 @@ func test_intmult() {
 	m := nat(nil).make(n)
 
 	for i := range x {
-		x[i] = 0xffffffffffffffff
+		//y[i] = 0xffffffffffffffff
+		x[i] = 0x4123789612703842
 	}
 	for i := range y {
-		y[i] = 0xffffffffffffffff
+		//y[i] = 0xffffffffffffffff
+		y[i] = 0x7392815892359834
 	}
 	for i := range m {
 		m[i] = 0xffffffffffffffff
 	}
+	x = natFromString2("0xffffffffffffffffffffffffffffffffffffffffffffffffe")
+	y = natFromString2("0xffffffffffffffffffffffffffffffffffffffffffffffffe")
 
 	x.PrintHex()
 	y.PrintHex()
+	fmt.Printf("lx: %d ly: %d\n", len(x), len(y))
 
 	z := nat(nil).make(len(x) + len(y))
 	z.clear()
-	fmt.Printf("lx: %d ly: %d\n", len(x), len(y))
-	intmadd512Nx512N(z, x, y)
+	intmult_mulx(z, x, y)
 	z.PrintHex()
+
+	f := nat(nil).make(len(x) + len(y))
+	f.clear()
+	intmult_mulq(f, x, y)
+	f.PrintHex()
+
+	if z.cmp(f) != 0 {
+		fmt.Println("Error")
+	}
 }
 
 func test_nat() {
@@ -157,7 +170,7 @@ func test_nat() {
 func (i Int) MasPruebas() {
 
 	//	test_nat()
-	//	test_intmult()
-	test_montgo()
+	test_intmult()
+	//	test_montgo()
 
 }

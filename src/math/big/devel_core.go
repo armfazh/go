@@ -15,8 +15,24 @@ func (z nat) montgomery8x(x, y, m nat, k Word, n int) nat {
 	// It also assumes that x, y are already reduced mod m,
 	// or else the result will not be properly reduced.
 	z = z.make(2 * n)
-//	z.clear()
-	intmadd512Nx512N(z, x, y)
+	z.clear()
+	intmult_mulx(z, x, y)
+	c := intmadd64x512N(z, m, k)
+	if c != 0 {
+		subVV(z[n:2*n], z[n:2*n], m)
+	}
+	z = z[n : 2*n]
+	return z
+}
+
+func (z nat) montgomery8x_mulq(x, y, m nat, k Word, n int) nat {
+	// This code assumes x, y, m are all the same length, n.
+	// (required by addMulVVW and the for loop).
+	// It also assumes that x, y are already reduced mod m,
+	// or else the result will not be properly reduced.
+	z = z.make(2 * n)
+	z.clear()
+	intmult_mulq(z, x, y)
 	c := intmadd64x512N(z, m, k)
 	if c != 0 {
 		subVV(z[n:2*n], z[n:2*n], m)

@@ -27,7 +27,12 @@ func intmadd64x512N(z, x []Word, k Word) (cout Word) {
 	return cout + 5
 }
 
-func intmadd512Nx512N(z, x, y []Word) {
+func intmult_mulx(z, x, y []Word) {
+	z[0] = x[0] + y[0]
+	return
+}
+
+func intmult_mulq(z, x, y []Word) {
 	z[0] = x[0] + y[0]
 	return
 }
