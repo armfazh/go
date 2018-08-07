@@ -154,11 +154,11 @@ L_END:
 	RET   // End of intmult_mulx function
 
 #define MUL64x64_MULQ(zz) \
-	MOVQ zz(SI), AX       \
-	ADCQ $0, R8           \
-	MULQ BX               \
-	ADDQ AX, R8           \
-	MOVQ R8, zz(DI)       \
+	MOVQ zz(SI), AX \
+	ADCQ $0, R8     \
+	MULQ BX         \
+	ADDQ AX, R8     \
+	MOVQ R8, zz(DI) \
 	MOVQ DX, R8
 	
 #define MUL64x512_MULQ \
@@ -168,21 +168,35 @@ L_END:
 	MUL64x64_MULQ(48); MUL64x64_MULQ(56) 
 
 #define MAD64x64_MULQ(zz) \
-	MOVQ zz(SI), AX       \
-	ADCQ $0, R8           \
-	MULQ BX               \
-	ADDQ AX, R8           \
-	ADCQ $0, DX           \
-	ADDQ zz(DI), R8       \
-	MOVQ R8, zz(DI)       \
+	ADCQ $0, R8     \
+	MOVQ zz(SI), AX \
+	MULQ BX         \
+	ADDQ AX, R8     \
+	ADCQ $0, DX     \
+	ADDQ zz(DI), R8 \
+	MOVQ R8, zz(DI) \
 	MOVQ DX, R8
 
-#define MAD64x512_MULQ \
-	MAD64x64_MULQ( 0); MAD64x64_MULQ( 8) \
-	MAD64x64_MULQ(16); MAD64x64_MULQ(24) \
-	MAD64x64_MULQ(32); MAD64x64_MULQ(40) \
-	MAD64x64_MULQ(48); MAD64x64_MULQ(56) 
+#define MAD64x256_MULQ(z) \
+	ADCQ $0, R8 \
+	MOVQ (z+ 0)(SI), AX; MULQ BX; MOVQ AX, R13; MOVQ DX,  R9 \
+	MOVQ (z+ 8)(SI), AX; MULQ BX; MOVQ AX, R14; MOVQ DX, R10 \
+	MOVQ (z+16)(SI), AX; MULQ BX; MOVQ AX, R15; MOVQ DX, R11 \
+	MOVQ (z+24)(SI), AX; MULQ BX; \
+	ADDQ R13,  R8 \
+	ADCQ R14,  R9 \
+	ADCQ R15, R10 \
+	ADCQ  AX, R11 \
+	ADCQ  $0,  DX \
+	ADDQ (z+ 0)(DI),  R8;  MOVQ  R8, (z+ 0)(DI) \
+	ADCQ (z+ 8)(DI),  R9;  MOVQ  R9, (z+ 8)(DI) \
+	ADCQ (z+16)(DI), R10;  MOVQ R10, (z+16)(DI) \
+	ADCQ (z+24)(DI), R11;  MOVQ R11, (z+24)(DI) \
+	;;;;;;;;;;;;;;;;;;;;;  MOVQ  DX, R8
 	
+#define MAD64x512_MULQ \
+	MAD64x256_MULQ(0)  \
+	MAD64x256_MULQ(32)
 
 //////////////////////////////////////////
 // func intmult_mulq(z, x, y []Word)
@@ -208,9 +222,11 @@ TEXT ·intmult_mulq(SB),NOSPLIT,$0
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
 	MOVQ y+48(FP), DX
+	MOVQ y_len+56(FP), CX
 
 	MOVQ $0, R8
 	MOVQ 0(DX), BX
+	
 	// Loop for x (8 words per iteration).
 	MOVQ x_len+32(FP), BP
 	SHRQ $3, BP
@@ -241,8 +257,7 @@ L_X1_Y1_START:
 	ADCQ $0, R8
 L_X1_Y1_END:
 	MOVQ R8, 0(DI)
-	MOVQ y_len+56(FP), CX
-	SUBQ $1, CX
+	DECQ CX
 	JZ L_END
 
 	// Loop for y runs CX=len(y)-1 iterations.
@@ -277,6 +292,7 @@ L_X8_END:
 	MOVQ x_len+32(FP), BP
 	ANDQ $0x7, BP
 	JZ L_X_END
+
 	CLC
 L_X1_START:
 		MAD64x64_MULQ(0)

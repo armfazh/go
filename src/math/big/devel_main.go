@@ -93,18 +93,14 @@ func test_intmult() {
 	m := nat(nil).make(n)
 
 	for i := range x {
-		//y[i] = 0xffffffffffffffff
-		x[i] = 0x4123789612703842
+		x[i] = 0xffffffffffffffff
 	}
 	for i := range y {
-		//y[i] = 0xffffffffffffffff
-		y[i] = 0x7392815892359834
+		y[i] = 0xffffffffffffffff
 	}
 	for i := range m {
 		m[i] = 0xffffffffffffffff
 	}
-	x = natFromString2("0xffffffffffffffffffffffffffffffffffffffffffffffffe")
-	y = natFromString2("0xffffffffffffffffffffffffffffffffffffffffffffffffe")
 
 	x.PrintHex()
 	y.PrintHex()
