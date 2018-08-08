@@ -22,7 +22,12 @@ func intmadd1x512(z, x, y []Word) {
 	return
 }
 
-func intmadd64x512N(z, x []Word, k Word) (cout Word) {
+func montReduction_mulx(z, x []Word, k Word) (cout Word) {
+	z[0] = x[0] + k
+	return cout + 5
+}
+
+func montReduction_mulq(z, x []Word, k Word) (cout Word) {
 	z[0] = x[0] + k
 	return cout + 5
 }

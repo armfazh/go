@@ -10,4 +10,7 @@ func intmult_mulq(z, x, y []Word)
 func intmult_mulx(z, x, y []Word)
 
 //go:noescape
-func intmadd64x512N(z, x []Word, k Word) (cout Word)
+func montReduction_mulx(z, x []Word, k Word) (cout Word)
+
+//go:noescape
+func montReduction_mulq(z, x []Word, k Word) (cout Word)

@@ -1,6 +1,5 @@
 // @author Armando Faz
 
-
 // +build !math_big_pure_go
 
 #include "textflag.h"
@@ -68,7 +67,6 @@ END:
 	ADCQ 48(DI), R14;  MOVQ R14, 48(DI)  \
 	ADCQ 56(DI), R15;  MOVQ R15, 56(DI)  \
 	;;;;;;;;;;;;;;;;;  MOVQ  DX, R8
-
 
 //////////////////////////////////////////////
 // func intmult_mulx(z, x, y []Word)
@@ -266,27 +264,34 @@ LB_YLOOP:
 L_END:
 	RET   // End of intmult_mulq function
 
-/////////////////////////////////////////////////
-// func intmadd64x512N(z, x []Word, k Word) (cout Word)
-TEXT ·intmadd64x512N(SB),NOSPLIT,$0
-	MOVQ $0, cout+56(FP)
-	//Early return 
-	// if len(x) == 0 then goto END
-	MOVQ x_len+32(FP), AX
-	CMPQ AX, $0
-	JEQ L_END
 
+//////////////////////////////////////////
+// func montReduction_mulx(z, x []Word, k Word) (cout Word)
+// z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP) 
+// x+24(FP) | x_len+32(FP) | x_cap+40(FP) 
+// k+48(FP) | cout+56(FP) 
+// Assumptions:
+//   1) len(z) == 2*len(x)
+//   2) len(z),len(x) >= 0
+//   3) MULX instruction is supported.
+TEXT ·montReduction_mulx(SB),NOSPLIT,$0
+	// Setting by default output-carry to zero.
+	MOVQ $0, cout+56(FP)
+	// if len(x) == 0 then goto END
 	MOVQ x_len+32(FP), CX
-L_NTIMES	:
+	CMPQ CX, $0
+	JEQ LE_Y
+
+LB_Y:
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
 	MOVQ x_len+32(FP), AX
 	SUBQ CX, AX
 	LEAQ (DI)(AX*8), DI
 
+	// Calculating q = X[i]*k mod 2^64
 	MOVQ k+48(FP), BX
 	IMULQ (DI), BX
-		
 	
 	MOVQ $0, R8
 	// Loop for x (8 words per iteration).
@@ -299,18 +304,73 @@ L_NTIMES	:
 	ANDQ $7, BP
 	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64x64_MULX(0);INCR(1), ACC(R8) )
 
-	// Adding input carry 
+	// Accumulating last word
 	MOVQ $0, AX
 	ADDQ 0(DI), R8
 	ADCQ $0, AX
+	// Adding input carry to the (n+i)-th word
 	ADDQ cout+56(FP), R8
 	ADCQ $0, AX	
 	MOVQ R8, 0(DI)
 	MOVQ AX, cout+56(FP)	
 	DECQ CX
-	JNZ L_NTIMES		
-L_END:
-	RET // End of intmadd64x512N
+	JNZ LB_Y	
+LE_Y:
+	RET // End of montReduction_mulx
+
+
+//////////////////////////////////////////
+// func montReduction_mulq(z, x []Word, k Word) (cout Word)
+// z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP) 
+// x+24(FP) | x_len+32(FP) | x_cap+40(FP) 
+// k+48(FP) | cout+56(FP) 
+// Assumptions:
+//   1) len(z) == 2*len(x)
+//   2) len(z),len(x) >= 0
+TEXT ·montReduction_mulq(SB),NOSPLIT,$0
+	// Setting by default output-carry to zero.
+	MOVQ $0, cout+56(FP)
+	// if len(x) == 0 then goto END
+	MOVQ x_len+32(FP), CX
+	CMPQ CX, $0
+	JEQ LE_Y
+
+LB_Y:
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI
+	MOVQ x_len+32(FP), AX
+	SUBQ CX, AX
+	LEAQ (DI)(AX*8), DI
+
+	// Calculating q = X[i]*k mod 2^64
+	MOVQ k+48(FP), BX
+	IMULQ (DI), BX
+	
+	MOVQ $0, R8
+	// Loop for x (8 words per iteration)
+	MOVQ x_len+32(FP), BP
+	SHRQ $3, BP
+	FOR(LB_X8_YN, LE_X8_YN, BP, CLC, MAD64x512_MULQ;  INCR(8), ACC(R8) )
+	// Loop for x (1 word per iteration)
+	MOVQ BX, DX
+	MOVQ x_len+32(FP), BP
+	ANDQ $7, BP
+	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64x64_MULQ(0);INCR(1), ACC(R8) )
+
+	// Accumulating last word
+	MOVQ $0, AX
+	ADDQ 0(DI), R8
+	ADCQ $0, AX
+	// Adding input carry to the (n+i)-th word
+	ADDQ cout+56(FP), R8
+	ADCQ $0, AX	
+	MOVQ R8, 0(DI)
+	MOVQ AX, cout+56(FP)	
+	DECQ CX
+	JNZ LB_Y	
+LE_Y:
+	RET // End of montReduction_mulq
+
 
 #undef INCR
 #undef ACC
