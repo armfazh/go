@@ -5,6 +5,23 @@
 
 #include "textflag.h"
 
+#define INCR(n) \
+	LEAQ (8*n)(SI), SI; \
+	LEAQ (8*n)(DI), DI;
+
+#define ACC(r) \
+	ADCQ $0, r;
+
+#define FOR(BEGIN,END,CTR,PRE,BODY,POST) \
+	JZ END    \
+	PRE;      \
+BEGIN:        \
+	BODY;     \
+	DECQ CTR; \
+	JNZ BEGIN \
+	POST;     \
+END:
+
 #define MUL64x512_MULX \
 	MULXQ  0(SI), AX,  R9;  ADCQ AX,  R8;  MOVQ  R8,  0(DI)  \
 	MULXQ  8(SI), AX, R10;  ADCQ AX,  R9;  MOVQ  R9,  8(DI)  \
@@ -208,11 +225,12 @@ L_END:
 //   1) len(z) == len(x)+len(y)
 //   2) len(z),len(x), len(y) >= 0
 TEXT ·intmult_mulq(SB),NOSPLIT,$0
+
 	// if len(x) == 0 then goto END
 	MOVQ x_len+32(FP), AX
 	CMPQ AX, $0
 	JEQ L_END
-	
+		
 	// if len(y) == 0 then goto END
 	MOVQ y_len+56(FP), AX
 	CMPQ AX, $0
@@ -222,46 +240,25 @@ TEXT ·intmult_mulq(SB),NOSPLIT,$0
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
 	MOVQ y+48(FP), DX
-	MOVQ y_len+56(FP), CX
 
+	MOVQ 0(DX), BX		
 	MOVQ $0, R8
-	MOVQ 0(DX), BX
-	
 	// Loop for x (8 words per iteration).
 	MOVQ x_len+32(FP), BP
 	SHRQ $3, BP
-	JZ L_X8_Y1_END
-	
-	CLC
-L_X1TIMES_START:
-		MUL64x512_MULQ
-		LEAQ 64(SI), SI
-		LEAQ 64(DI), DI
-		DECQ BP
-	JNZ L_X1TIMES_START
-	ADCQ $0, R8
-L_X8_Y1_END:
-
+	FOR(LB_X8_Y1, LE_X8_Y1, BP, CLC, MUL64x512_MULQ;  INCR(8), ACC(R8) )
 	// Loop for x (1 word per iteration).
 	MOVQ x_len+32(FP), BP
-	ANDQ $0x7, BP
-	JZ L_X1_Y1_END
-
-	CLC
-L_X1_Y1_START:
-		MUL64x64_MULQ(0)
-		LEAQ 8(SI), SI
-		LEAQ 8(DI), DI
-		DECQ BP
-	JNZ	L_X1_Y1_START
-	ADCQ $0, R8
-L_X1_Y1_END:
+	ANDQ $7, BP
+	FOR(LB_X1_Y1, LE_X1_Y1, BP, CLC, MUL64x64_MULQ(0);INCR(1), ACC(R8) )
 	MOVQ R8, 0(DI)
+
+	MOVQ y_len+56(FP), CX
 	DECQ CX
 	JZ L_END
 
 	// Loop for y runs CX=len(y)-1 iterations.
-L_YTIMES:
+LB_YLOOP:
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
 	MOVQ y+48(FP), DX
@@ -269,42 +266,21 @@ L_YTIMES:
 	SUBQ CX, AX
 	LEAQ (DI)(AX*8), DI
 	LEAQ (DX)(AX*8), DX
-	
-	MOVQ $0, R8
+
 	MOVQ 0(DX), BX
-	
+	MOVQ $0, R8
 	// Loop for x (8 words per iteration).
 	MOVQ x_len+32(FP), BP
 	SHRQ $3, BP
-	JZ L_X8_END
-	
-	CLC
-L_X8_START:
-		MAD64x512_MULQ
-		LEAQ 64(SI), SI
-		LEAQ 64(DI), DI
-		DECQ BP
-	JNZ L_X8_START
-	ADCQ $0, R8
-L_X8_END:
-
+	FOR(LB_X8_YN, LE_X8_YN, BP, CLC, MAD64x512_MULQ;  INCR(8), ACC(R8) )
 	// Loop for x (1 word per iteration).
 	MOVQ x_len+32(FP), BP
-	ANDQ $0x7, BP
-	JZ L_X_END
-
-	CLC
-L_X1_START:
-		MAD64x64_MULQ(0)
-		LEAQ 8(SI), SI
-		LEAQ 8(DI), DI
-		DECQ BP
-	JNZ	L_X1_START
-	ADCQ $0, R8
-L_X_END:
+	ANDQ $7, BP
+	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64x64_MULQ(0);INCR(1), ACC(R8) )
 	MOVQ R8, 0(DI)
+
 	DECQ CX
-	JNZ	L_YTIMES
+	JNZ	LB_YLOOP
 L_END:
 	RET   // End of intmult_mulq function
 
@@ -374,3 +350,14 @@ L_X_END:
 	JNZ L_NTIMES		
 L_END:
 	RET // End of intmadd64x512N
+
+#undef INCR
+#undef ACC
+#undef FOR
+#undef MUL64x512_MULX 
+#undef MADD64x512_MULX  
+#undef MUL64x64_MULQ
+#undef MUL64x512_MULQ 
+#undef MAD64x64_MULQ
+#undef MAD64x256_MULQ
+#undef MAD64x512_MULQ 
