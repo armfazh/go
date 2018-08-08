@@ -166,7 +166,7 @@ func test_nat() {
 func (i Int) MasPruebas() {
 
 	//	test_nat()
-	test_intmult()
-	//	test_montgo()
+	//test_intmult()
+	test_montgo()
 
 }

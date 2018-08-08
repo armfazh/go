@@ -284,43 +284,22 @@ L_NTIMES	:
 	SUBQ CX, AX
 	LEAQ (DI)(AX*8), DI
 
-	MOVQ k+48(FP), BP
-	IMULQ (DI), BP
+	MOVQ k+48(FP), BX
+	IMULQ (DI), BX
+		
 	
 	MOVQ $0, R8
-	MOVQ x_len+32(FP), BX
-	SHRQ $3, BX
-	JZ L_X8_END
-	
-	CLC
-L_X8_START:
-		MOVQ BP, DX
-		MAD64x512_MULX
-		LEAQ 64(SI), SI
-		LEAQ 64(DI), DI
-		DECQ BX
-	JNZ L_X8_START
-	ADCQ $0, R8
-L_X8_END:
-	MOVQ x_len+32(FP), BX
-	ANDQ $0x7, BX
-	JZ L_X_END
+	// Loop for x (8 words per iteration).
+	MOVQ x_len+32(FP), BP
+	SHRQ $3, BP
+	FOR(LB_X8_YN, LE_X8_YN, BP, CLC, MAD64x512_MULX;  INCR(8), ACC(R8) )
+	// Loop for x (1 word per iteration).
+	MOVQ BX, DX
+	MOVQ x_len+32(FP), BP
+	ANDQ $7, BP
+	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64x64_MULX(0);INCR(1), ACC(R8) )
 
-	MOVQ BP, DX
-	CLC
-L_X1_START:
-		MULXQ 0(SI), AX, R9
-		ADCQ AX, R8
-		ADCQ $0, R9
-		ADDQ 0(DI), R8 
-		MOVQ R8, 0(DI)
-		MOVQ R9, R8
-		LEAQ 8(SI), SI
-		LEAQ 8(DI), DI
-		DECQ BX
-	JNZ	L_X1_START
-	ADCQ $0, R8
-L_X_END:
+	// Adding input carry 
 	MOVQ $0, AX
 	ADDQ 0(DI), R8
 	ADCQ $0, AX
