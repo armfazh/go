@@ -456,8 +456,9 @@ func TestMontgomery(t *testing.T) {
 			t.Errorf("#%d: k0 in table=%#x, computed=%#x\n", i, test.k0, k0)
 		}
 
+		buffer := nat(nil).make(2 * len(m))
 		// check montgomery with correct k0 produces correct output
-		z := nat(nil).montgomery(x, y, m, k0, len(m))
+		z := nat(nil).montgomery(x, y, m, buffer, k0)
 		z = z.norm()
 		if z.cmp(out) != 0 {
 			t.Errorf("#%d: got 0x%s want 0x%s", i, z.utoa(16), out.utoa(16))

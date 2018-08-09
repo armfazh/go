@@ -199,7 +199,7 @@ func basicMul(z, x, y nat) {
 // In the terminology of that paper, this is an "Almost Montgomery Multiplication":
 // x and y are required to satisfy 0 <= z < 2**(n*_W) and then the result
 // z is guaranteed to satisfy 0 <= z < 2**(n*_W), but it may not be < m.
-func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
+func (z nat) montgomery_gen(x, y, m nat, k Word, n int) nat {
 	// This code assumes x, y, m are all the same length, n.
 	// (required by addMulVVW and the for loop).
 	// It also assumes that x, y are already reduced mod m,
@@ -207,30 +207,22 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 	if len(x) != n || len(y) != n || len(m) != n {
 		panic("math/big: mismatched montgomery number lengths")
 	}
+	z = z.make(n)
+	z.clear()
 	var c Word
-	if n > 0 && n%8 == 0 {
-		z = z.make(2 * n)
-		z.clear()
-		intmul512Nx512N(z, x, y)
-		c = redMontgomery512N(z, m, k)
-		z = z[n:]
-	} else {
-		z = z.make(n)
-		z.clear()
-		for i := 0; i < n; i++ {
-			d := y[i]
-			c2 := addMulVVW(z, x, d)
-			t := z[0] * k
-			c3 := addMulVVW(z, m, t)
-			copy(z, z[1:])
-			cx := c + c2
-			cy := cx + c3
-			z[n-1] = cy
-			if cx < c2 || cy < c3 {
-				c = 1
-			} else {
-				c = 0
-			}
+	for i := 0; i < n; i++ {
+		d := y[i]
+		c2 := addMulVVW(z, x, d)
+		t := z[0] * k
+		c3 := addMulVVW(z, m, t)
+		copy(z, z[1:])
+		cx := c + c2
+		cy := cx + c3
+		z[n-1] = cy
+		if cx < c2 || cy < c3 {
+			c = 1
+		} else {
+			c = 0
 		}
 	}
 	if c != 0 {
@@ -1143,13 +1135,15 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 	one := make(nat, numWords)
 	one[0] = 1
 
+	buffer := nat(nil).make(2 * numWords)
+
 	const n = 4
 	// powers[i] contains x^i
 	var powers [1 << n]nat
-	powers[0] = powers[0].montgomery(one, RR, m, k0, numWords)
-	powers[1] = powers[1].montgomery(x, RR, m, k0, numWords)
+	powers[0] = powers[0].montgomery(one, RR, m, buffer, k0)
+	powers[1] = powers[1].montgomery(x, RR, m, buffer, k0)
 	for i := 2; i < 1<<n; i++ {
-		powers[i] = powers[i].montgomery(powers[i-1], powers[1], m, k0, numWords)
+		powers[i] = powers[i].montgomery(powers[i-1], powers[1], m, buffer, k0)
 	}
 
 	// initialize z = 1 (Montgomery 1)
@@ -1163,18 +1157,18 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 		yi := y[i]
 		for j := 0; j < _W; j += n {
 			if i != len(y)-1 || j != 0 {
-				zz = zz.montgomery(z, z, m, k0, numWords)
-				z = z.montgomery(zz, zz, m, k0, numWords)
-				zz = zz.montgomery(z, z, m, k0, numWords)
-				z = z.montgomery(zz, zz, m, k0, numWords)
+				zz = zz.montgomery(z, z, m, buffer, k0)
+				z = z.montgomery(zz, zz, m, buffer, k0)
+				zz = zz.montgomery(z, z, m, buffer, k0)
+				z = z.montgomery(zz, zz, m, buffer, k0)
 			}
-			zz = zz.montgomery(z, powers[yi>>(_W-n)], m, k0, numWords)
+			zz = zz.montgomery(z, powers[yi>>(_W-n)], m, buffer, k0)
 			z, zz = zz, z
 			yi <<= n
 		}
 	}
 	// convert to regular number
-	zz = zz.montgomery(z, one, m, k0, numWords)
+	zz = zz.montgomery(z, one, m, buffer, k0)
 
 	// One last reduction, just in case.
 	// See golang.org/issue/13907.

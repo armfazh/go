@@ -420,11 +420,12 @@ func BenchmarkMontgomery(b *testing.B) {
 		mulx := rndV(n)
 		muly := rndV(n)
 		mod := rndV(n)
-		z := nat(nil).make(2*n)
+		buffer := nat(nil).make(2 * n)
+		var z nat
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {
-				z.montgomery(mulx, muly, mod, k, n)
+				z.montgomery(mulx, muly, mod, buffer, k)
 			}
 		})
 	}
