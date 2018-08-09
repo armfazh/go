@@ -88,7 +88,7 @@ func test_montgo() {
 
 func test_intmult() {
 
-	n := 5
+	n := 1
 	x := nat(nil).make(n)
 	y := nat(nil).make(n)
 	m := nat(nil).make(n)
@@ -167,7 +167,7 @@ func test_nat() {
 func (i Int) MasPruebas() {
 
 	//	test_nat()
-	//test_intmult()
-	test_montgo()
+	test_intmult()
+	//	test_montgo()
 
 }
