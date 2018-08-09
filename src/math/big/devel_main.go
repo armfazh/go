@@ -77,7 +77,8 @@ func test_montgo() {
 	z = z.montgomery(x, y, m, k0, n)
 	z.PrintHex()
 
-	f = f.montgomery8x_mulq(x, y, m, k0, n)
+	buffer := f.make(2 * n)
+	f = f.montgomery_opt(x, y, m, buffer, k0)
 	f.PrintHex()
 
 	if z.cmp(f) != 0 {

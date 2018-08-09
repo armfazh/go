@@ -208,8 +208,8 @@ func (z nat) montgomery(x, y, m nat, k Word, n int) nat {
 		panic("math/big: mismatched montgomery number lengths")
 	}
 	//if n > 0 && n%8 == 0 {
-	z = z.montgomery8x(x, y, m, k, n)
-	return z
+	//	z = z.montgomery8x(x, y, m, k, n)
+	//	return z
 	//}
 	z = z.make(n)
 	z.clear()
@@ -1139,13 +1139,15 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 	one := make(nat, numWords)
 	one[0] = 1
 
+	buffer := nat(nil).make(2 * numWords)
+
 	const n = 4
 	// powers[i] contains x^i
 	var powers [1 << n]nat
-	powers[0] = powers[0].montgomery(one, RR, m, k0, numWords)
-	powers[1] = powers[1].montgomery(x, RR, m, k0, numWords)
+	powers[0] = powers[0].montgomery_opt(one, RR, m, buffer, k0)
+	powers[1] = powers[1].montgomery_opt(x, RR, m, buffer, k0)
 	for i := 2; i < 1<<n; i++ {
-		powers[i] = powers[i].montgomery(powers[i-1], powers[1], m, k0, numWords)
+		powers[i] = powers[i].montgomery_opt(powers[i-1], powers[1], m, buffer, k0)
 	}
 
 	// initialize z = 1 (Montgomery 1)
@@ -1159,18 +1161,18 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 		yi := y[i]
 		for j := 0; j < _W; j += n {
 			if i != len(y)-1 || j != 0 {
-				zz = zz.montgomery(z, z, m, k0, numWords)
-				z = z.montgomery(zz, zz, m, k0, numWords)
-				zz = zz.montgomery(z, z, m, k0, numWords)
-				z = z.montgomery(zz, zz, m, k0, numWords)
+				zz = zz.montgomery_opt(z, z, m, buffer, k0)
+				z = z.montgomery_opt(zz, zz, m, buffer, k0)
+				zz = zz.montgomery_opt(z, z, m, buffer, k0)
+				z = z.montgomery_opt(zz, zz, m, buffer, k0)
 			}
-			zz = zz.montgomery(z, powers[yi>>(_W-n)], m, k0, numWords)
+			zz = zz.montgomery_opt(z, powers[yi>>(_W-n)], m, buffer, k0)
 			z, zz = zz, z
 			yi <<= n
 		}
 	}
 	// convert to regular number
-	zz = zz.montgomery(z, one, m, k0, numWords)
+	zz = zz.montgomery_opt(z, one, m, buffer, k0)
 
 	// One last reduction, just in case.
 	// See golang.org/issue/13907.

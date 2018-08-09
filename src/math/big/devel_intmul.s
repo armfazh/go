@@ -109,10 +109,10 @@ TEXT ·intmult_mulx(SB),NOSPLIT,$0
 
 	MOVQ y_len+56(FP), CX
 	DECQ CX
-	JZ L_END
+	JZ LE_Y
 
 	// Loop for y runs CX=len(y)-1 iterations.
-LB_YLOOP:
+LB_Y:
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
 	MOVQ y+48(FP), DX
@@ -135,7 +135,8 @@ LB_YLOOP:
 	MOVQ R8, 0(DI)
 
 	DECQ CX
-	JNZ	LB_YLOOP
+	JNZ	LB_Y
+LE_Y:
 L_END:
 	RET   // End of intmult_mulx function
 
@@ -195,6 +196,33 @@ L_END:
 	MAD64x256_MULQ(0)  \
 	MAD64x256_MULQ(32)
 
+
+#define ITER_X(MAD64,MAD512) \
+	MOVQ $0, R8                                                  \
+	/* Loop for x (8 words per iteration). */                    \
+	MOVQ x_len+32(FP), BP                                        \
+	SHRQ $3, BP                                                  \
+	FOR(LB_X8_YN, LE_X8_YN, BP, CLC, MAD512;  INCR(8), ACC(R8) ) \
+	/* Loop for x (1 word per iteration).*/                      \
+	MOVQ BX, DX                                                  \
+	MOVQ x_len+32(FP), BP                                        \
+	ANDQ $7, BP                                                  \
+	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64(0);INCR(1), ACC(R8) ) 
+
+#define ITER2_X(MAD64,MAD512) \
+	MOVQ $0, R8                                                  \
+	/* Loop for x (8 words per iteration). */                    \
+	MOVQ x_len+32(FP), BP                                        \
+	SHRQ $3, BP                                                  \
+	FOR(LB_X8_Y1, LE_X8_Y1, BP, CLC, MAD512;  INCR(8), ACC(R8) ) \
+	/* Loop for x (1 word per iteration).*/                      \
+	MOVQ BX, DX                                                  \
+	MOVQ x_len+32(FP), BP                                        \
+	ANDQ $7, BP                                                  \
+	FOR(LB_X1_Y1, LE_X1_Y1, BP, CLC, MAD64(0);INCR(1), ACC(R8) ) 
+
+
+
 //////////////////////////////////////////
 // func intmult_mulq(z, x, y []Word)
 // z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP) 
@@ -222,23 +250,15 @@ TEXT ·intmult_mulq(SB),NOSPLIT,$0
 	MOVQ y+48(FP), DX
 
 	MOVQ 0(DX), BX		
-	MOVQ $0, R8
-	// Loop for x (8 words per iteration).
-	MOVQ x_len+32(FP), BP
-	SHRQ $3, BP
-	FOR(LB_X8_Y1, LE_X8_Y1, BP, CLC, MUL64x512_MULQ;  INCR(8), ACC(R8) )
-	// Loop for x (1 word per iteration).
-	MOVQ x_len+32(FP), BP
-	ANDQ $7, BP
-	FOR(LB_X1_Y1, LE_X1_Y1, BP, CLC, MUL64x64_MULQ(0);INCR(1), ACC(R8) )
+	ITER2_X(MUL64x64_MULQ,MUL64x512_MULQ)
 	MOVQ R8, 0(DI)
 
 	MOVQ y_len+56(FP), CX
 	DECQ CX
-	JZ L_END
+	JZ LE_Y
 
 	// Loop for y runs CX=len(y)-1 iterations.
-LB_YLOOP:
+LB_Y:
 	MOVQ z+ 0(FP), DI
 	MOVQ x+24(FP), SI
 	MOVQ y+48(FP), DX
@@ -248,22 +268,14 @@ LB_YLOOP:
 	LEAQ (DX)(AX*8), DX
 
 	MOVQ 0(DX), BX
-	MOVQ $0, R8
-	// Loop for x (8 words per iteration).
-	MOVQ x_len+32(FP), BP
-	SHRQ $3, BP
-	FOR(LB_X8_YN, LE_X8_YN, BP, CLC, MAD64x512_MULQ;  INCR(8), ACC(R8) )
-	// Loop for x (1 word per iteration).
-	MOVQ x_len+32(FP), BP
-	ANDQ $7, BP
-	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64x64_MULQ(0);INCR(1), ACC(R8) )
+	ITER_X(MAD64x64_MULQ,MAD64x512_MULQ)
 	MOVQ R8, 0(DI)
 
 	DECQ CX
-	JNZ	LB_YLOOP
+	JNZ	LB_Y
+LE_Y:
 L_END:
 	RET   // End of intmult_mulq function
-
 
 //////////////////////////////////////////
 // func montReduction_mulx(z, x []Word, k Word) (cout Word)
@@ -292,18 +304,9 @@ LB_Y:
 	// Calculating q = X[i]*k mod 2^64
 	MOVQ k+48(FP), BX
 	IMULQ (DI), BX
-	
-	MOVQ $0, R8
-	// Loop for x (8 words per iteration).
-	MOVQ x_len+32(FP), BP
-	SHRQ $3, BP
-	FOR(LB_X8_YN, LE_X8_YN, BP, CLC, MAD64x512_MULX;  INCR(8), ACC(R8) )
-	// Loop for x (1 word per iteration).
-	MOVQ BX, DX
-	MOVQ x_len+32(FP), BP
-	ANDQ $7, BP
-	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64x64_MULX(0);INCR(1), ACC(R8) )
 
+	ITER_X(MAD64x64_MULX, MAD64x512_MULX)
+	
 	// Accumulating last word
 	MOVQ $0, AX
 	ADDQ 0(DI), R8
@@ -346,17 +349,8 @@ LB_Y:
 	MOVQ k+48(FP), BX
 	IMULQ (DI), BX
 	
-	MOVQ $0, R8
-	// Loop for x (8 words per iteration)
-	MOVQ x_len+32(FP), BP
-	SHRQ $3, BP
-	FOR(LB_X8_YN, LE_X8_YN, BP, CLC, MAD64x512_MULQ;  INCR(8), ACC(R8) )
-	// Loop for x (1 word per iteration)
-	MOVQ BX, DX
-	MOVQ x_len+32(FP), BP
-	ANDQ $7, BP
-	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64x64_MULQ(0);INCR(1), ACC(R8) )
-
+	ITER_X(MAD64x64_MULQ, MAD64x512_MULQ)
+	
 	// Accumulating last word
 	MOVQ $0, AX
 	ADDQ 0(DI), R8

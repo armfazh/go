@@ -63,17 +63,18 @@ func BenchmarkFazMontgomery_mulx(b *testing.B) {
 		mulx := rndV(n)
 		muly := rndV(n)
 		mod := rndV(n)
-		//		z := nat(nil).make(len(mulx) + len(muly))
+		buffer := nat(nil).make(len(mulx) + len(muly))
 		var z nat
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {
-				z.montgomery8x(mulx, muly, mod, k, n)
+				z.montgomery_opt(mulx, muly, mod, buffer, k)
 			}
 		})
 	}
 }
 
+/*
 func BenchmarkFazMontgomery_mulq(b *testing.B) {
 	var benchSizes = []int{8, 16, 24, 32}
 	var k Word
@@ -92,3 +93,4 @@ func BenchmarkFazMontgomery_mulq(b *testing.B) {
 		})
 	}
 }
+*/
