@@ -1,3 +1,5 @@
+// @author Armando Faz
+
 // +build !math_big_pure_go
 
 package big
@@ -7,7 +9,6 @@ import (
 )
 
 var hasBMI2 = cpu.X86.HasBMI2
-var hasADX = cpu.X86.HasADX
 
 // implemented in montgomery_$GOARCH.s
 //go:noescape
@@ -31,10 +32,13 @@ func montReduction_mulq(z, x []Word, k Word) (cout Word)
 // In the terminology of that paper, this is an "Almost Montgomery Multiplication":
 // x and y are required to satisfy 0 <= z < 2**(n*_W) and then the result
 // z is guaranteed to satisfy 0 <= z < 2**(n*_W), but it may not be < m.
+
+// Pre-conditions:
+// 1) This code assumes x, y, m are all the same length.
+// 2) It also assumes that x, y are already reduced mod m,
+//    or else the result will not be properly reduced.
+// 3) buffer_mult is an allocated array of length len(x)+len(y)
 func (z nat) montgomery(x, y, m, buffer_mult nat, k Word) nat {
-	// This code assumes x, y, m are all the same length, n.
-	// It also assumes that x, y are already reduced mod m,
-	// or else the result will not be properly reduced.
 	var c Word
 	n := len(m)
 	z = z.make(n)

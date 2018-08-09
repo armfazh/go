@@ -466,6 +466,25 @@ func TestMontgomery(t *testing.T) {
 	}
 }
 
+func BenchmarkMontgomery(b *testing.B) {
+	var benchSizes = []int{8, 16, 24, 32}
+	var k Word
+	k = (1 << 64) - 1
+	for _, n := range benchSizes {
+		x := rndV(n)
+		y := rndV(n)
+		m := rndV(n)
+		buffer := nat(nil).make(len(x) + len(y))
+		var z nat
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				z.montgomery(x, y, m, buffer, k)
+			}
+		})
+	}
+}
+
 var expNNTests = []struct {
 	x, y, m string
 	out     string

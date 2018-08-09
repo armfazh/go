@@ -49,11 +49,3 @@ func addMulVVW(z, x []Word, y Word) (c Word) {
 func divWVW(z []Word, xn Word, x []Word, y Word) (r Word) {
 	return divWVW_g(z, xn, x, y)
 }
-
-func intmul512Nx512N(z, x, y []Word) {
-	intmul512Nx512N_g(z, x, y)
-}
-
-func redMontgomery512N(z, x []Word, k Word) (c Word) {
-	return redMontgomery512N_g(z, x, k)
-}

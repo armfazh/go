@@ -258,12 +258,3 @@ func divWVW_g(z []Word, xn Word, x []Word, y Word) (r Word) {
 	}
 	return
 }
-
-func intmul512Nx512N_g(z, x, y []Word) {
-	//TODO
-}
-
-func redMontgomery512N_g(z, x []Word, k Word) (cout Word) {
-	//TODO
-	return 0
-}
