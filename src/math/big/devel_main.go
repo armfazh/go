@@ -122,6 +122,35 @@ func test_intmult() {
 	}
 }
 
+func test_red() {
+
+	x := natFromString2("0x721ae740e4589920677374b8ea579122f63eee1ed92b2722e57130c4518a12f624c9d09fa1158478745b977bfdbd6e48d24329eb590e337888fa9ea76af5b712836916ba5cf1a65e2c1ef9bdeeeed3a226d25948e742d7e9d2f75614a58fcaf76aae3fd9a3557f7fcb5c81d6f9ccc5cb1249a8795e2ad8378196b1b57bd4d6d0")
+	m := natFromString2("0xbe033362228c50d6e9a8474e95988295a5060c74836adca9dd3d23c966b3889ef566d214b3a729be483df348f01a27cbd6ebf77866ecd6e1cacd546520873213")
+	o := natFromString2("0x3df38a78b80e42f83583444bd5d52e8ec441761ecd331c0250b24fbb32a1304840f546391bc9f6881bc674391b0a4453ce82f50875b17180cd4fb17d802ecffe")
+
+	n := len(m)
+	fmt.Printf("n: %d\n", n)
+	x.PrintHex()
+	m.PrintHex()
+	o.PrintHex()
+	k0 := Word(0xd4d620471e3d97e5)
+	c := montReduction_mulx(x, m, k0)
+	x = x[n : 2*n]
+	x.PrintHex()
+	fmt.Printf("c: %d\n", c)
+	if c != 0 {
+		subVV(x, x, m)
+	}
+	if x.cmp(m) > 0 {
+		subVV(x, x, m)
+	}
+
+	x.PrintHex()
+	if o.cmp(x) != 0 {
+		fmt.Println("error")
+	}
+}
+
 func test_nat() {
 
 	x, _, _, err := nat(nil).scan(strings.NewReader("AABBCCDDEEFF11223344556677"), 16, false)
@@ -167,7 +196,8 @@ func test_nat() {
 func (i Int) MasPruebas() {
 
 	//	test_nat()
-	test_intmult()
+	//	test_intmult()
+	test_red()
 	//	test_montgo()
 
 }
