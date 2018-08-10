@@ -51,7 +51,7 @@ func (z nat) montgomery(x, y, m, buffer_mult nat, k Word) nat {
 	}
 	subVV(buffer_mult[0:n], buffer_mult[n:2*n], m)
 
-	// constantTimeCopy taken from crypto/subtle
+	// constantTimeCopy adapted from crypto/subtle
 	xmask := Word(c - 1)
 	ymask := Word(^(c - 1))
 	for i := 0; i < len(z); i++ {
