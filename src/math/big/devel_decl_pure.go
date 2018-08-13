@@ -32,6 +32,11 @@ func montReduction_mulq(z, x []Word, k Word) (cout Word) {
 	return cout + 5
 }
 
+func intmult_mulx_adx(z, x, y []Word) {
+	z[0] = x[0] + y[0]
+	return
+}
+
 func intmult_mulx(z, x, y []Word) {
 	z[0] = x[0] + y[0]
 	return

@@ -5,6 +5,7 @@ import (
 )
 
 var hasBMI2 = cpu.X86.HasBMI2
+var hasADX = cpu.X86.HasADX
 
 // ConstantTimeCopy copies the contents of y into x (a slice of equal length)
 // if v == 1. If v == 0, x is left unchanged. Its behavior is undefined if v
@@ -27,8 +28,13 @@ func (z nat) montgomery_opt(x, y, m, buffer_mult nat, k Word) nat {
 	n := len(m)
 	z = z.make(n)
 	if hasBMI2 {
-		intmult_mulx(buffer_mult, x, y)
-		c = montReduction_mulx(buffer_mult, m, k)
+		if hasADX {
+			intmult_mulx_adx(buffer_mult, x, y)
+			c = montReduction_mulx(buffer_mult, m, k)
+		} else {
+			intmult_mulx(buffer_mult, x, y)
+			c = montReduction_mulx(buffer_mult, m, k)
+		}
 	} else {
 		intmult_mulq(buffer_mult, x, y)
 		c = montReduction_mulq(buffer_mult, m, k)
