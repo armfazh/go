@@ -5,22 +5,6 @@ import (
 	"testing"
 )
 
-func BenchmarkFazintmult_mulx(b *testing.B) {
-	var benchSizes = []int{8, 16, 24, 32}
-
-	for _, n := range benchSizes {
-		x := rndV(n)
-		y := rndV(n)
-		z := nat(nil).make(len(x) + len(y))
-		b.Run(fmt.Sprint(n), func(b *testing.B) {
-			b.SetBytes(int64(n * _W))
-			for i := 0; i < b.N; i++ {
-				intmult_mulx(z, x, y)
-			}
-		})
-	}
-}
-
 func BenchmarkFazintmult_mulx_adx(b *testing.B) {
 	var benchSizes = []int{8, 16, 24, 32}
 
@@ -32,6 +16,22 @@ func BenchmarkFazintmult_mulx_adx(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {
 				intmult_mulx_adx(z, x, y)
+			}
+		})
+	}
+}
+
+func BenchmarkFazintmult_mulx(b *testing.B) {
+	var benchSizes = []int{8, 16, 24, 32}
+
+	for _, n := range benchSizes {
+		x := rndV(n)
+		y := rndV(n)
+		z := nat(nil).make(len(x) + len(y))
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			b.SetBytes(int64(n * _W))
+			for i := 0; i < b.N; i++ {
+				intmult_mulx(z, x, y)
 			}
 		})
 	}
