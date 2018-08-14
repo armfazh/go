@@ -37,6 +37,9 @@ func testIntMult(t *testing.T, f intmult, sizes []int, value gen_value) {
 			want := nat(nil).mul(x, y)
 			if got.cmp(want) != 0 {
 				t.Errorf("#(%d,%d) got %s want %s", i, j, got.utoa(16), want.utoa(16))
+				t.Errorf("X= %s\n Y= %s\n", x.utoa(16), y.utoa(16))
+				t.Errorf("lX= %d\n lY= %d\n", len(x), len(y))
+				return
 			}
 		}
 	}

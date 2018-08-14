@@ -80,6 +80,11 @@ func dev_intmult() {
 	for i := range m {
 		m[i] = 0xffffffffffffffff
 	}
+	//	x = natFromString2("0xe84bc9880c21fe25f91ce5f34d39c59cb9e1d18c40244401b8604f24f5b96fc2c34843f1107f6e69b0abf18b99111750a77534b769445a2ce3ebf310b1792c0")
+	//	y = natFromString2("0x9978fc40cd1f1988fa502cf33f0d6e3dd8c9b1023dc78696")
+
+	//	x = x[:8]
+	//	y = y[:2]
 
 	x.PrintHex()
 	y.PrintHex()

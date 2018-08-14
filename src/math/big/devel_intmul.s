@@ -38,17 +38,26 @@ END:
 	MULXQ 56(SI), AX,  R8;  ADCXQ AX, R15;  MOVQ R15, 56(DI)
 
 #define MAD64x512_MULX_ADX  \
-	MOVQ BX, DX             \
-	XORQ AX, AX             \
-	MULXQ  0(SI), AX,  R9; ADOXQ AX,  R8; ADCXQ  0(DI),  R8; MOVQ  R8,  0(DI) \
-	MULXQ  8(SI), AX, R10; ADOXQ AX,  R9; ADCXQ  8(DI),  R9; MOVQ  R9,  8(DI) \
-	MULXQ 16(SI), AX, R11; ADOXQ AX, R10; ADCXQ 16(DI), R10; MOVQ R10, 16(DI) \
-	MULXQ 24(SI), AX, R12; ADOXQ AX, R11; ADCXQ 24(DI), R11; MOVQ R11, 24(DI) \
-	MULXQ 32(SI), AX, R13; ADOXQ AX, R12; ADCXQ 32(DI), R12; MOVQ R12, 32(DI) \
-	MULXQ 40(SI), AX, R14; ADOXQ AX, R13; ADCXQ 40(DI), R13; MOVQ R13, 40(DI) \
-	MULXQ 48(SI), AX, R15; ADOXQ AX, R14; ADCXQ 48(DI), R14; MOVQ R14, 48(DI) \
-	MULXQ 56(SI), AX,  R8; ADOXQ AX, R15; ADCXQ 56(DI), R15; MOVQ R15, 56(DI) \
-	MOVL $0, AX ;;;;;;;;;; ADOXQ AX,  R8; ADCXQ     AX,  R8;
+	MOVQ BX, DX  \
+	ANDQ AX, AX  \
+	MULXQ  0(SI), AX,  R9;  ADOXQ AX,  R8;  ADCXQ  0(DI),  R8;  \
+	MULXQ  8(SI), AX, R10;  ADOXQ AX,  R9;  ADCXQ  8(DI),  R9;  \
+	MULXQ 16(SI), AX, R11;  ADOXQ AX, R10;  ADCXQ 16(DI), R10;  \
+	MULXQ 24(SI), AX, R12;  ADOXQ AX, R11;  ADCXQ 24(DI), R11;  \
+	MULXQ 32(SI), AX, R13;  ADOXQ AX, R12;  ADCXQ 32(DI), R12;  \
+	MULXQ 40(SI), AX, R14;  ADOXQ AX, R13;  ADCXQ 40(DI), R13;  \
+	MULXQ 48(SI), AX, R15;  ADOXQ AX, R14;  ADCXQ 48(DI), R14;  \
+	MULXQ 56(SI), AX,  DX;  ADOXQ AX, R15;  ADCXQ 56(DI), R15;  \
+	MOVQ $0, AX;;;;;;;;;;;  ADOXQ AX,  DX;  ADCXQ     AX,  DX;  \
+	MOVQ  R8,  0(DI)  \
+	MOVQ  R9,  8(DI)  \
+	MOVQ R10, 16(DI)  \
+	MOVQ R11, 24(DI)  \
+	MOVQ R12, 32(DI)  \
+	MOVQ R13, 40(DI)  \
+	MOVQ R14, 48(DI)  \
+	MOVQ R15, 56(DI)  \
+	MOVQ  DX, R8
 
 
 #define MUL64x64_MULX(zz) \
@@ -76,25 +85,25 @@ END:
 	MOVQ R9, R8
 
 #define MAD64x512_MULX  \
-	MOVQ BX, DX                           \
-	MULXQ  0(SI), AX,  R9;  ADCQ AX,  R8  \
-	MULXQ  8(SI), AX, R10;  ADCQ AX,  R9  \
-	MULXQ 16(SI), AX, R11;  ADCQ AX, R10  \
-	MULXQ 24(SI), AX, R12;  ADCQ AX, R11  \
-	MULXQ 32(SI), AX, R13;  ADCQ AX, R12  \
-	MULXQ 40(SI), AX, R14;  ADCQ AX, R13  \
-	MULXQ 48(SI), AX, R15;  ADCQ AX, R14  \
-	MULXQ 56(SI), AX,  DX;  ADCQ AX, R15  \
-	;;;;;;;;;;;;;;;;;;;;;;  ADCQ $0,  DX  \
-	ADDQ  0(DI),  R8;  MOVQ  R8,  0(DI)  \
-	ADCQ  8(DI),  R9;  MOVQ  R9,  8(DI)  \
-	ADCQ 16(DI), R10;  MOVQ R10, 16(DI)  \
-	ADCQ 24(DI), R11;  MOVQ R11, 24(DI)  \
-	ADCQ 32(DI), R12;  MOVQ R12, 32(DI)  \
-	ADCQ 40(DI), R13;  MOVQ R13, 40(DI)  \
-	ADCQ 48(DI), R14;  MOVQ R14, 48(DI)  \
-	ADCQ 56(DI), R15;  MOVQ R15, 56(DI)  \
-	;;;;;;;;;;;;;;;;;  MOVQ  DX, R8
+    MOVQ BX, DX         \
+    MULXQ  0(SI), AX,  R9;  ADCQ AX,  R8  \
+    MULXQ  8(SI), AX, R10;  ADCQ AX,  R9  \
+    MULXQ 16(SI), AX, R11;  ADCQ AX, R10  \
+    MULXQ 24(SI), AX, R12;  ADCQ AX, R11  \
+    MULXQ 32(SI), AX, R13;  ADCQ AX, R12  \
+    MULXQ 40(SI), AX, R14;  ADCQ AX, R13  \
+    MULXQ 48(SI), AX, R15;  ADCQ AX, R14  \
+    MULXQ 56(SI), AX,  DX;  ADCQ AX, R15  \
+    ;;;;;;;;;;;;;;;;;;;;;;  ADCQ $0,  DX  \
+    ADDQ  0(DI),  R8;  MOVQ  R8,  0(DI)  \
+    ADCQ  8(DI),  R9;  MOVQ  R9,  8(DI)  \
+    ADCQ 16(DI), R10;  MOVQ R10, 16(DI)  \
+    ADCQ 24(DI), R11;  MOVQ R11, 24(DI)  \
+    ADCQ 32(DI), R12;  MOVQ R12, 32(DI)  \
+    ADCQ 40(DI), R13;  MOVQ R13, 40(DI)  \
+    ADCQ 48(DI), R14;  MOVQ R14, 48(DI)  \
+    ADCQ 56(DI), R15;  MOVQ R15, 56(DI)  \
+;;;;;;;;;;;;;;;;;  MOVQ  DX, R8
 
 #define MUL64x64_MULQ(zz) \
 	MOVQ zz(SI), AX \
@@ -221,7 +230,7 @@ LB_Y:
 	LEAQ (DX)(AX*8), DX
 
 	MOVQ 0(DX), BX
-	ITER_XN(MAD64x64_MULX,MAD64x512_MULX_ADX)	
+	ITER_XN(MAD64x64_MULX,MAD64x512_MULX_ADX)
 	MOVQ R8, 0(DI)
 
 	DECQ CX
