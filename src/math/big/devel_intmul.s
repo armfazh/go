@@ -103,7 +103,7 @@ END:
     ADCQ 40(DI), R13;  MOVQ R13, 40(DI)  \
     ADCQ 48(DI), R14;  MOVQ R14, 48(DI)  \
     ADCQ 56(DI), R15;  MOVQ R15, 56(DI)  \
-;;;;;;;;;;;;;;;;;  MOVQ  DX, R8
+    ;;;;;;;;;;;;;;;;;  MOVQ  DX, R8
 
 #define MUL64x64_MULQ(zz) \
 	MOVQ zz(SI), AX \
@@ -350,6 +350,51 @@ L_END:
 	RET   // End of intmult_mulq function
 
 //////////////////////////////////////////
+// func montReduction_mulx_adx(z, x []Word, k Word) (cout Word)
+// z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
+// x+24(FP) | x_len+32(FP) | x_cap+40(FP)
+// k+48(FP) | cout+56(FP)
+// Assumptions:
+//   1) len(z) == 2*len(x)
+//   2) len(z),len(x) >= 0
+//   3) MULX and ADX instruction are supported.
+TEXT ·montReduction_mulx_adx(SB),NOSPLIT,$0
+	// Setting by default output-carry to zero.
+	MOVQ $0, cout+56(FP)
+
+	// if len(x) == 0 then goto END
+	MOVQ x_len+32(FP), CX
+	CMPQ CX, $0
+	JEQ LE_Y
+
+LB_Y:
+	MOVQ z+ 0(FP), DI
+	MOVQ x+24(FP), SI
+	MOVQ x_len+32(FP), AX
+	SUBQ CX, AX
+	LEAQ (DI)(AX*8), DI
+
+	// Calculating q = X[i]*k mod 2^64
+	MOVQ k+48(FP), BX
+	IMULQ (DI), BX
+
+	ITER_XN(MAD64x64_MULX, MAD64x512_MULX_ADX)
+
+	// Accumulating last word
+	MOVQ $0, AX
+	ADDQ 0(DI), R8
+	ADCQ $0, AX
+	// Adding input carry to the (n+i)-th word
+	ADDQ cout+56(FP), R8
+	ADCQ $0, AX
+	MOVQ R8, 0(DI)
+	MOVQ AX, cout+56(FP)
+	DECQ CX
+	JNZ LB_Y	
+LE_Y:
+	RET // End of montReduction_mulx_adx
+
+//////////////////////////////////////////
 // func montReduction_mulx(z, x []Word, k Word) (cout Word)
 // z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP) 
 // x+24(FP) | x_len+32(FP) | x_cap+40(FP) 
@@ -396,9 +441,9 @@ LE_Y:
 
 //////////////////////////////////////////
 // func montReduction_mulq(z, x []Word, k Word) (cout Word)
-// z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP) 
-// x+24(FP) | x_len+32(FP) | x_cap+40(FP) 
-// k+48(FP) | cout+56(FP) 
+// z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
+// x+24(FP) | x_len+32(FP) | x_cap+40(FP)
+// k+48(FP) | cout+56(FP)
 // Assumptions:
 //   1) len(z) == 2*len(x)
 //   2) len(z),len(x) >= 0
@@ -441,6 +486,9 @@ LE_Y:
 #undef INCR
 #undef ACC
 #undef FOR
+#undef MUL64x64_MULX_ADX
+#undef MUL64x512_MULX_ADX
+#undef MAD64x512_MULX_ADX
 #undef MUL64x64_MULX
 #undef MUL64x512_MULX
 #undef MAD64x64_MULX

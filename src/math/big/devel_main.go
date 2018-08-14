@@ -117,7 +117,7 @@ func dev_red() {
 	m.PrintHex()
 	o.PrintHex()
 	k0 := Word(0xd4d620471e3d97e5)
-	c := montReduction_mulx(x, m, k0)
+	c := montReduction_mulx_adx(x, m, k0)
 	x = x[n : 2*n]
 	x.PrintHex()
 	fmt.Printf("c: %d\n", c)
@@ -127,7 +127,6 @@ func dev_red() {
 	if x.cmp(m) > 0 {
 		subVV(x, x, m)
 	}
-
 	x.PrintHex()
 	if o.cmp(x) != 0 {
 		fmt.Println("error")
@@ -179,8 +178,8 @@ func dev_nat() {
 func (i Int) MasPruebas() {
 
 	//	dev_nat()
-	dev_intmult()
-	//	dev_red()
+	//	dev_intmult()
+	dev_red()
 	//	dev_montgo()
 
 }

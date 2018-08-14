@@ -13,6 +13,9 @@ func intmult_mulx(z, x, y []Word)
 func intmult_mulx_adx(z, x, y []Word)
 
 //go:noescape
+func montReduction_mulx_adx(z, x []Word, k Word) (cout Word)
+
+//go:noescape
 func montReduction_mulx(z, x []Word, k Word) (cout Word)
 
 //go:noescape

@@ -193,16 +193,14 @@ func testMontgomeryReduction(t *testing.T, f montRed, r *rand.Rand) {
 }
 
 func TestMontgomeryReduction(t *testing.T) {
-
 	r := rand.New(rand.NewSource(int64(time.Now().UnixNano())))
 	testMontgomeryReduction(t, montReduction_mulq, r)
 	if cpu.X86.HasBMI2 {
 		testMontgomeryReduction(t, montReduction_mulx, r)
 	}
-	//	if cpu.X86.HasBMI2  && cpu.X86.HasADX {
-	//		testMontgomeryReduction(t, montReduction_mulx_adx, r)
-	//	}
-
+	if cpu.X86.HasBMI2 && cpu.X86.HasADX {
+		testMontgomeryReduction(t, montReduction_mulx_adx, r)
+	}
 }
 
 var devel_expTests = []struct {

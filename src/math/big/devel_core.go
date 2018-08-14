@@ -30,7 +30,7 @@ func (z nat) montgomery_opt(x, y, m, buffer_mult nat, k Word) nat {
 	if hasBMI2 {
 		if hasADX {
 			intmult_mulx_adx(buffer_mult, x, y)
-			c = montReduction_mulx(buffer_mult, m, k)
+			c = montReduction_mulx_adx(buffer_mult, m, k)
 		} else {
 			intmult_mulx(buffer_mult, x, y)
 			c = montReduction_mulx(buffer_mult, m, k)
