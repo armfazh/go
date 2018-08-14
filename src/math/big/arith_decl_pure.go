@@ -49,3 +49,8 @@ func addMulVVW(z, x []Word, y Word) (c Word) {
 func divWVW(z []Word, xn Word, x []Word, y Word) (r Word) {
 	return divWVW_g(z, xn, x, y)
 }
+
+func fios(z, x []Word, y Word, m []Word, k Word) {
+	z[0]= x[0]*y
+}
+
