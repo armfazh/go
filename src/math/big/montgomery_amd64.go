@@ -9,13 +9,20 @@ import (
 )
 
 var hasBMI2 = cpu.X86.HasBMI2
+var hasADX = cpu.X86.HasADX
 
 // implemented in montgomery_$GOARCH.s
+//go:noescape
+func intmult_mulx_adx(z, x, y []Word)
+
+//go:noescape
+func intmult_mulx(z, x, y []Word)
+
 //go:noescape
 func intmult_mulq(z, x, y []Word)
 
 //go:noescape
-func intmult_mulx(z, x, y []Word)
+func montReduction_mulx_adx(z, x []Word, k Word) (cout Word)
 
 //go:noescape
 func montReduction_mulx(z, x []Word, k Word) (cout Word)
@@ -43,8 +50,13 @@ func (z nat) montgomery(x, y, m, buffer_mult nat, k Word) nat {
 	n := len(m)
 	z = z.make(n)
 	if hasBMI2 {
-		intmult_mulx(buffer_mult, x, y)
-		c = montReduction_mulx(buffer_mult, m, k)
+		if hasADX {
+			intmult_mulx_adx(buffer_mult, x, y)
+			c = montReduction_mulx_adx(buffer_mult, m, k)
+		} else {
+			intmult_mulx(buffer_mult, x, y)
+			c = montReduction_mulx(buffer_mult, m, k)
+		}
 	} else {
 		intmult_mulq(buffer_mult, x, y)
 		c = montReduction_mulq(buffer_mult, m, k)
