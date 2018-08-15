@@ -32,7 +32,7 @@ END:
 	MULXQ  8(SI), AX, R10;  ADCXQ AX,  R9;  MOVQ  R9,  8(DI)  \
 	MULXQ 16(SI), AX, R11;  ADCXQ AX, R10;  MOVQ R10, 16(DI)  \
 	MULXQ 24(SI), AX, R12;  ADCXQ AX, R11;  MOVQ R11, 24(DI)  \
-	MULXQ 32(SI), AX, R13;  ADCXQ AX, R12;  MOVQ R12, 32(DI)  \ 
+	MULXQ 32(SI), AX, R13;  ADCXQ AX, R12;  MOVQ R12, 32(DI)  \
 	MULXQ 40(SI), AX, R14;  ADCXQ AX, R13;  MOVQ R13, 40(DI)  \
 	MULXQ 48(SI), AX, R15;  ADCXQ AX, R14;  MOVQ R14, 48(DI)  \
 	MULXQ 56(SI), AX,  R8;  ADCXQ AX, R15;  MOVQ R15, 56(DI)
@@ -71,7 +71,7 @@ END:
 	MULXQ  8(SI), AX, R10;  ADCQ AX,  R9;  MOVQ  R9,  8(DI)  \
 	MULXQ 16(SI), AX, R11;  ADCQ AX, R10;  MOVQ R10, 16(DI)  \
 	MULXQ 24(SI), AX, R12;  ADCQ AX, R11;  MOVQ R11, 24(DI)  \
-	MULXQ 32(SI), AX, R13;  ADCQ AX, R12;  MOVQ R12, 32(DI)  \ 
+	MULXQ 32(SI), AX, R13;  ADCQ AX, R12;  MOVQ R12, 32(DI)  \
 	MULXQ 40(SI), AX, R14;  ADCQ AX, R13;  MOVQ R13, 40(DI)  \
 	MULXQ 48(SI), AX, R15;  ADCQ AX, R14;  MOVQ R14, 48(DI)  \
 	MULXQ 56(SI), AX,  R8;  ADCQ AX, R15;  MOVQ R15, 56(DI)
@@ -80,7 +80,7 @@ END:
 	MULXQ zz(SI), AX, R9  \
 	ADCQ AX, R8           \
 	ADCQ $0, R9           \
-	ADDQ zz(DI), R8       \ 
+	ADDQ zz(DI), R8       \
 	MOVQ R8, zz(DI)       \
 	MOVQ R9, R8
 
@@ -170,7 +170,7 @@ END:
 	/* Loop for x (1 word per iteration).*/                      \
 	MOVQ x_len+32(FP), BP                                        \
 	ANDQ $7, BP                                                  \
-	FOR(LB_X1_Y1, LE_X1_Y1, BP, CLC, MUL64(0);INCR(1), ACC(R8) ) 
+	FOR(LB_X1_Y1, LE_X1_Y1, BP, CLC, MUL64(0);INCR(1), ACC(R8) )
 
 #define ITER_XN(MAD64,MAD512) \
 	MOVQ $0, R8                                                  \
@@ -212,7 +212,7 @@ TEXT ·intmult_mulx_adx(SB),NOSPLIT,$0
 	MOVQ y+48(FP), DX
 
 	MOVQ 0(DX), BX
-	ITER_X1(MUL64x64_MULX_ADX,MUL64x512_MULX_ADX)	
+	ITER_X1(MUL64x64_MULX_ADX,MUL64x512_MULX_ADX)
 	MOVQ R8, 0(DI)
 
 	MOVQ y_len+56(FP), CX
@@ -390,15 +390,15 @@ LB_Y:
 	MOVQ R8, 0(DI)
 	MOVQ AX, cout+56(FP)
 	DECQ CX
-	JNZ LB_Y	
+	JNZ LB_Y
 LE_Y:
 	RET // End of montReduction_mulx_adx
 
 //////////////////////////////////////////
 // func montReduction_mulx(z, x []Word, k Word) (cout Word)
-// z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP) 
-// x+24(FP) | x_len+32(FP) | x_cap+40(FP) 
-// k+48(FP) | cout+56(FP) 
+// z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
+// x+24(FP) | x_len+32(FP) | x_cap+40(FP)
+// k+48(FP) | cout+56(FP)
 // Assumptions:
 //   1) len(z) == 2*len(x)
 //   2) len(z),len(x) >= 0
@@ -435,7 +435,7 @@ LB_Y:
 	MOVQ R8, 0(DI)
 	MOVQ AX, cout+56(FP)
 	DECQ CX
-	JNZ LB_Y	
+	JNZ LB_Y
 LE_Y:
 	RET // End of montReduction_mulx
 
@@ -479,7 +479,7 @@ LB_Y:
 	MOVQ R8, 0(DI)
 	MOVQ AX, cout+56(FP)
 	DECQ CX
-	JNZ LB_Y	
+	JNZ LB_Y
 LE_Y:
 	RET // End of montReduction_mulq
 
