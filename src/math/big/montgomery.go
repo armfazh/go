@@ -1,6 +1,6 @@
 // @author Armando Faz
 
-// +build math_big_pure_go
+// +build math_big_pure_go !amd64
 
 package big
 
