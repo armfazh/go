@@ -6,8 +6,8 @@ package big
 
 import "internal/cpu"
 
-var intMult func(x, y, z []Word)
-var reductionMontgomery func(x, y []Word, k Word) (cout Word)
+var intMult func([]Word, []Word, []Word)
+var reductionMontgomery func([]Word, []Word, Word) Word
 
 func init() {
 	if cpu.X86.HasBMI2 {
@@ -63,10 +63,10 @@ func (z nat) montgomery(x, y, m, buffer nat, k Word) nat {
 	z = z.make(n)
 
 	intMult(buffer, x, y)
-	reductionMontgomery(buffer, m, k)
+	c = reductionMontgomery(buffer, m, k)
 	subVV(buffer[0:n], buffer[n:2*n], m)
 
-	// ConstantTimeCopy adapted from bytes to Words
+	// ConstantTimeCopy (from crypto/subtle) is adapted to operate on Words
 	xmask := Word(c - 1)
 	ymask := Word(^(c - 1))
 	for i := 0; i < len(z); i++ {
