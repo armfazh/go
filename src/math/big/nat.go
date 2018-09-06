@@ -190,7 +190,7 @@ func basicMul(z, x, y nat) {
 	}
 }
 
-// montgomery computes z mod m = x*y*2**(-n*_W) mod m,
+// montgomery_g computes z mod m = x*y*2**(-n*_W) mod m,
 // assuming k = -1/m mod 2**_W.
 // z is used for storing the result which is returned;
 // z must not alias x, y or m.

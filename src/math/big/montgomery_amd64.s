@@ -185,7 +185,7 @@ END:
 	FOR(LB_X1_YN, LE_X1_YN, BP, CLC, MAD64(0);INCR(1), ACC(R8) )
 
 //////////////////////////////////////////////
-// func intmult_mulx_adx(z, x, y []Word)
+// func intMultMulxAdx(z, x, y []Word)
 // z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
 // x+24(FP) | x_len+32(FP) | x_cap+40(FP)
 // y+48(FP) | y_len+56(FP) | y_cap+64(FP)
@@ -194,7 +194,7 @@ END:
 //   1) len(z) == len(x)+len(y)
 //   2) len(z),len(x), len(y) >= 0
 //   3) MULX and ADX instructions are supported.
-TEXT ·intmult_mulx_adx(SB),NOSPLIT,$0
+TEXT ·intMultMulxAdx(SB),NOSPLIT,$0
 
 	// if len(x) == 0 then goto END
 	MOVQ x_len+32(FP), AX
@@ -237,11 +237,11 @@ LB_Y:
 	JNZ	LB_Y
 LE_Y:
 L_END:
-	RET   // End of intmult_mulx_adx function
+	RET   // End of intMultMulxAdx function
 
 
 //////////////////////////////////////////////
-// func intmult_mulx(z, x, y []Word)
+// func intMultMulx(z, x, y []Word)
 // z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
 // x+24(FP) | x_len+32(FP) | x_cap+40(FP)
 // y+48(FP) | y_len+56(FP) | y_cap+64(FP)
@@ -250,7 +250,7 @@ L_END:
 //   1) len(z) == len(x)+len(y)
 //   2) len(z),len(x), len(y) >= 0
 //   3) MULX instruction is supported.
-TEXT ·intmult_mulx(SB),NOSPLIT,$0
+TEXT ·intMultMulx(SB),NOSPLIT,$0
 
 	// if len(x) == 0 then goto END
 	MOVQ x_len+32(FP), AX
@@ -293,10 +293,10 @@ LB_Y:
 	JNZ	LB_Y
 LE_Y:
 L_END:
-	RET   // End of intmult_mulx function
+	RET   // End of intMultMulx function
 
 //////////////////////////////////////////
-// func intmult_mulq(z, x, y []Word)
+// func intMultMulq(z, x, y []Word)
 // z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
 // x+24(FP) | x_len+32(FP) | x_cap+40(FP)
 // y+48(FP) | y_len+56(FP) | y_cap+64(FP)
@@ -304,7 +304,7 @@ L_END:
 // Assumptions:
 //   1) len(z) == len(x)+len(y)
 //   2) len(z),len(x), len(y) >= 0
-TEXT ·intmult_mulq(SB),NOSPLIT,$0
+TEXT ·intMultMulq(SB),NOSPLIT,$0
 
 	// if len(x) == 0 then goto END
 	MOVQ x_len+32(FP), AX
@@ -347,10 +347,10 @@ LB_Y:
 	JNZ	LB_Y
 LE_Y:
 L_END:
-	RET   // End of intmult_mulq function
+	RET   // End of intMultMulq function
 
 //////////////////////////////////////////
-// func montReduction_mulx_adx(z, x []Word, k Word) (cout Word)
+// func montReductionMulxAdx(z, x []Word, k Word) (cout Word)
 // z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
 // x+24(FP) | x_len+32(FP) | x_cap+40(FP)
 // k+48(FP) | cout+56(FP)
@@ -358,7 +358,7 @@ L_END:
 //   1) len(z) == 2*len(x)
 //   2) len(z),len(x) >= 0
 //   3) MULX and ADX instruction are supported.
-TEXT ·montReduction_mulx_adx(SB),NOSPLIT,$0
+TEXT ·montReductionMulxAdx(SB),NOSPLIT,$0
 	// Setting by default output-carry to zero.
 	MOVQ $0, cout+56(FP)
 
@@ -392,10 +392,10 @@ LB_Y:
 	DECQ CX
 	JNZ LB_Y
 LE_Y:
-	RET // End of montReduction_mulx_adx
+	RET // End of montReductionMulxAdx
 
 //////////////////////////////////////////
-// func montReduction_mulx(z, x []Word, k Word) (cout Word)
+// func montReductionMulx(z, x []Word, k Word) (cout Word)
 // z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
 // x+24(FP) | x_len+32(FP) | x_cap+40(FP)
 // k+48(FP) | cout+56(FP)
@@ -403,7 +403,7 @@ LE_Y:
 //   1) len(z) == 2*len(x)
 //   2) len(z),len(x) >= 0
 //   3) MULX instruction is supported.
-TEXT ·montReduction_mulx(SB),NOSPLIT,$0
+TEXT ·montReductionMulx(SB),NOSPLIT,$0
 	// Setting by default output-carry to zero.
 	MOVQ $0, cout+56(FP)
 
@@ -437,17 +437,17 @@ LB_Y:
 	DECQ CX
 	JNZ LB_Y
 LE_Y:
-	RET // End of montReduction_mulx
+	RET // End of montReductionMulx
 
 //////////////////////////////////////////
-// func montReduction_mulq(z, x []Word, k Word) (cout Word)
+// func montReductionMulq(z, x []Word, k Word) (cout Word)
 // z+ 0(FP) | z_len+ 8(FP) | z_cap+16(FP)
 // x+24(FP) | x_len+32(FP) | x_cap+40(FP)
 // k+48(FP) | cout+56(FP)
 // Assumptions:
 //   1) len(z) == 2*len(x)
 //   2) len(z),len(x) >= 0
-TEXT ·montReduction_mulq(SB),NOSPLIT,$0
+TEXT ·montReductionMulq(SB),NOSPLIT,$0
 	// Setting by default output-carry to zero.
 	MOVQ $0, cout+56(FP)
 
@@ -481,7 +481,7 @@ LB_Y:
 	DECQ CX
 	JNZ LB_Y
 LE_Y:
-	RET // End of montReduction_mulq
+	RET // End of montReductionMulq
 
 #undef INCR
 #undef ACC

@@ -11,22 +11,22 @@ import (
 
 type intmult func([]Word, []Word, []Word)
 type montRed func([]Word, []Word, Word) Word
-type gen_value func() Word
+type genValue func() Word
 
-func testIntMult(t *testing.T, f intmult, sizes []int, value gen_value) {
+func testIntMult(t *testing.T, f intmult, sizes []int, value genValue) {
 
-	for i, x_len := range sizes {
-		for j, y_len := range sizes {
-			x := nat(nil).make(x_len)
-			y := nat(nil).make(y_len)
-			for t, _ := range x {
+	for i, lenX := range sizes {
+		for j, lenY := range sizes {
+			x := nat(nil).make(lenX)
+			y := nat(nil).make(lenY)
+			for t := range x {
 				x[t] = value()
 			}
 
-			for t, _ := range y {
+			for t := range y {
 				y[t] = value()
 			}
-			got := nat(nil).make(x_len + y_len)
+			got := nat(nil).make(lenX + lenY)
 			f(got, x, y)
 			got = got.norm()
 
@@ -40,7 +40,7 @@ func testIntMult(t *testing.T, f intmult, sizes []int, value gen_value) {
 
 func TestIntMult(t *testing.T) {
 	r := rand.New(rand.NewSource(int64(time.Now().UnixNano())))
-	values := []gen_value{
+	values := []genValue{
 		func() Word { return 0 },
 		func() Word { return 1 },
 		func() Word { return (1 << _W) - 1 },
@@ -48,17 +48,17 @@ func TestIntMult(t *testing.T) {
 	}
 
 	length := make([]int, 64)
-	for i, _ := range length {
+	for i := range length {
 		length[i] = i
 	}
 
 	for _, value := range values {
-		testIntMult(t, intmult_mulq, length, value)
+		testIntMult(t, intMultMulq, length, value)
 		if cpu.X86.HasBMI2 {
-			testIntMult(t, intmult_mulx, length, value)
+			testIntMult(t, intMultMulx, length, value)
 		}
 		if cpu.X86.HasBMI2 && cpu.X86.HasADX {
-			testIntMult(t, intmult_mulx_adx, length, value)
+			testIntMult(t, intMultMulxAdx, length, value)
 		}
 	}
 }
@@ -187,11 +187,11 @@ func testMontgomeryReduction(t *testing.T, f montRed, r *rand.Rand) {
 
 func TestMontgomeryReduction(t *testing.T) {
 	r := rand.New(rand.NewSource(int64(time.Now().UnixNano())))
-	testMontgomeryReduction(t, montReduction_mulq, r)
+	testMontgomeryReduction(t, montReductionMulq, r)
 	if cpu.X86.HasBMI2 {
-		testMontgomeryReduction(t, montReduction_mulx, r)
+		testMontgomeryReduction(t, montReductionMulx, r)
 	}
 	if cpu.X86.HasBMI2 && cpu.X86.HasADX {
-		testMontgomeryReduction(t, montReduction_mulx_adx, r)
+		testMontgomeryReduction(t, montReductionMulxAdx, r)
 	}
 }
