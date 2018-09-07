@@ -4,31 +4,43 @@
 
 package big
 
-import (
-	"internal/cpu"
-)
+import "internal/cpu"
 
-var hasBMI2 = cpu.X86.HasBMI2
-var hasADX = cpu.X86.HasADX
+var intMult func([]Word, []Word, []Word)
+var reductionMontgomery func([]Word, []Word, Word) Word
 
-// implemented in montgomery_$GOARCH.s
-//go:noescape
-func intmult_mulx_adx(z, x, y []Word)
-
-//go:noescape
-func intmult_mulx(z, x, y []Word)
-
-//go:noescape
-func intmult_mulq(z, x, y []Word)
-
-//go:noescape
-func montReduction_mulx_adx(z, x []Word, k Word) (cout Word)
-
-//go:noescape
-func montReduction_mulx(z, x []Word, k Word) (cout Word)
+func init() {
+	if cpu.X86.HasBMI2 {
+		if cpu.X86.HasADX {
+			intMult = intMultMulxAdx
+			reductionMontgomery = montReductionMulxAdx
+		} else {
+			intMult = intMultMulx
+			reductionMontgomery = montReductionMulx
+		}
+	} else {
+		intMult = intMultMulq
+		reductionMontgomery = montReductionMulq
+	}
+}
 
 //go:noescape
-func montReduction_mulq(z, x []Word, k Word) (cout Word)
+func intMultMulxAdx(z, x, y []Word)
+
+//go:noescape
+func intMultMulx(z, x, y []Word)
+
+//go:noescape
+func intMultMulq(z, x, y []Word)
+
+//go:noescape
+func montReductionMulxAdx(z, x []Word, k Word) (cout Word)
+
+//go:noescape
+func montReductionMulx(z, x []Word, k Word) (cout Word)
+
+//go:noescape
+func montReductionMulq(z, x []Word, k Word) (cout Word)
 
 // montgomery computes z mod m = x*y*2**(-n*_W) mod m,
 // assuming k = -1/m mod 2**_W.
@@ -45,29 +57,20 @@ func montReduction_mulq(z, x []Word, k Word) (cout Word)
 // 2) It also assumes that x, y are already reduced mod m,
 //    or else the result will not be properly reduced.
 // 3) buffer_mult is an allocated array of length len(x)+len(y)
-func (z nat) montgomery(x, y, m, buffer_mult nat, k Word) nat {
+func (z nat) montgomery(x, y, m, buffer nat, k Word) nat {
 	var c Word
 	n := len(m)
 	z = z.make(n)
-	if hasBMI2 {
-		if hasADX {
-			intmult_mulx_adx(buffer_mult, x, y)
-			c = montReduction_mulx_adx(buffer_mult, m, k)
-		} else {
-			intmult_mulx(buffer_mult, x, y)
-			c = montReduction_mulx(buffer_mult, m, k)
-		}
-	} else {
-		intmult_mulq(buffer_mult, x, y)
-		c = montReduction_mulq(buffer_mult, m, k)
-	}
-	subVV(buffer_mult[0:n], buffer_mult[n:2*n], m)
 
-	// constantTimeCopy adapted from crypto/subtle
+	intMult(buffer, x, y)
+	c = reductionMontgomery(buffer, m, k)
+	subVV(buffer[0:n], buffer[n:2*n], m)
+
+	// ConstantTimeCopy (from crypto/subtle) is adapted to operate on Words
 	xmask := Word(c - 1)
 	ymask := Word(^(c - 1))
 	for i := 0; i < len(z); i++ {
-		z[i] = buffer_mult[n+i]&xmask | buffer_mult[i]&ymask
+		z[i] = buffer[n+i]&xmask | buffer[i]&ymask
 	}
 	return z
 }

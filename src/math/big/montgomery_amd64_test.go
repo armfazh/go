@@ -3,7 +3,6 @@
 package big
 
 import (
-	"internal/cpu"
 	"math/rand"
 	"testing"
 	"time"
@@ -11,22 +10,22 @@ import (
 
 type intmult func([]Word, []Word, []Word)
 type montRed func([]Word, []Word, Word) Word
-type gen_value func() Word
+type genValue func() Word
 
-func testIntMult(t *testing.T, f intmult, sizes []int, value gen_value) {
+func testIntMult(t *testing.T, f intmult, sizes []int, value genValue) {
 
-	for i, x_len := range sizes {
-		for j, y_len := range sizes {
-			x := nat(nil).make(x_len)
-			y := nat(nil).make(y_len)
-			for t, _ := range x {
+	for i, lenX := range sizes {
+		for j, lenY := range sizes {
+			x := nat(nil).make(lenX)
+			y := nat(nil).make(lenY)
+			for t := range x {
 				x[t] = value()
 			}
 
-			for t, _ := range y {
+			for t := range y {
 				y[t] = value()
 			}
-			got := nat(nil).make(x_len + y_len)
+			got := nat(nil).make(lenX + lenY)
 			f(got, x, y)
 			got = got.norm()
 
@@ -40,7 +39,7 @@ func testIntMult(t *testing.T, f intmult, sizes []int, value gen_value) {
 
 func TestIntMult(t *testing.T) {
 	r := rand.New(rand.NewSource(int64(time.Now().UnixNano())))
-	values := []gen_value{
+	values := []genValue{
 		func() Word { return 0 },
 		func() Word { return 1 },
 		func() Word { return (1 << _W) - 1 },
@@ -48,18 +47,12 @@ func TestIntMult(t *testing.T) {
 	}
 
 	length := make([]int, 64)
-	for i, _ := range length {
+	for i := range length {
 		length[i] = i
 	}
 
 	for _, value := range values {
-		testIntMult(t, intmult_mulq, length, value)
-		if cpu.X86.HasBMI2 {
-			testIntMult(t, intmult_mulx, length, value)
-		}
-		if cpu.X86.HasBMI2 && cpu.X86.HasADX {
-			testIntMult(t, intmult_mulx_adx, length, value)
-		}
+		testIntMult(t, intMult, length, value)
 	}
 }
 
@@ -138,7 +131,8 @@ var setOfPrimes = []string{
 	"0xba02224983ed209c818fe19fabbb354dc8b6a84a02504182caf2badf410d85a90e741d07fdcbbc70c27c4be66ba2f7033d5c2c0c722ff97bf85fadb7f2f29e39520e49b15a3a4d06831a19fe21162dba659f045a6ad9e5a7b1a59298e792554508fbebf35c0a4fa79eb2127a03ab54a9c0be4ffdab4e9ac47eab6b87e83beca70ccdde8ba685bae14d55ef68a241ae76b59a039854633e8a47aa33ead7992a8c75dc98d0c743c168168711d3619da859084e28ad22cb5ea651fae3d8ec70a75f9e7c9dbb265e294a311a9d9dee93332a0879f9689753599701cba26e1105f15e81cd669d59a184fc6906be7e3d471652cfa035b6abae40dee1b1c9bbb4c42127",
 }
 
-func testMontgomeryReduction(t *testing.T, f montRed, r *rand.Rand) {
+func TestMontgomeryReduction(t *testing.T) {
+	r := rand.New(rand.NewSource(int64(time.Now().UnixNano())))
 	one := NewInt(1)
 	_B := new(Int).Lsh(one, _W)
 
@@ -165,7 +159,7 @@ func testMontgomeryReduction(t *testing.T, f montRed, r *rand.Rand) {
 			// Generating got
 			got := nat(nil).make(2 * n)
 			copy(got, x)
-			c := f(got, m, k0)
+			c := reductionMontgomery(got, m, k0)
 			got = got[n : 2*n]
 
 			// got can be larger than 2**(n*_W)
@@ -184,15 +178,3 @@ func testMontgomeryReduction(t *testing.T, f montRed, r *rand.Rand) {
 		}
 	}
 }
-
-func TestMontgomeryReduction(t *testing.T) {
-	r := rand.New(rand.NewSource(int64(time.Now().UnixNano())))
-	testMontgomeryReduction(t, montReduction_mulq, r)
-	if cpu.X86.HasBMI2 {
-		testMontgomeryReduction(t, montReduction_mulx, r)
-	}
-	if cpu.X86.HasBMI2 && cpu.X86.HasADX {
-		testMontgomeryReduction(t, montReduction_mulx_adx, r)
-	}
-}
-
