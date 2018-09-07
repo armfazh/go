@@ -17,3 +17,4 @@ func (z nat) montgomery(x, y, m, buffer nat, k Word) nat {
 	z = z.montgomery_g(x, y, m, k, len(m))
 	return z
 }
+
