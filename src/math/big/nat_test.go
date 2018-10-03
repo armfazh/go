@@ -486,7 +486,9 @@ func TestMontgomery(t *testing.T) {
 
 		buffer := nat(nil).make(2 * len(m))
 		// check montgomery with correct k0 produces correct output
-		z := nat(nil).montgomery(x, y, m, buffer, k0)
+		var z nat
+		z = z.make(len(m))
+		z = z.montgomery(x, y, m, buffer, k0)
 		z = z.norm()
 		if z.cmp(out) != 0 {
 			t.Errorf("#%d: got 0x%s want 0x%s", i, z.utoa(16), out.utoa(16))
@@ -504,6 +506,7 @@ func BenchmarkMontgomery(b *testing.B) {
 		m := rndV(n)
 		buffer := nat(nil).make(len(x) + len(y))
 		var z nat
+		z = z.make(n)
 		b.Run(fmt.Sprint(n), func(b *testing.B) {
 			b.SetBytes(int64(n * _W))
 			for i := 0; i < b.N; i++ {

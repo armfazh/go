@@ -53,14 +53,13 @@ func montReductionMulq(z, x []Word, k Word) (cout Word)
 // z is guaranteed to satisfy 0 <= z < 2**(n*_W), but it may not be < m.
 
 // Pre-conditions:
-// 1) This code assumes x, y, m are all the same length.
+// 1) This code assumes z, x, y, m are all the same length.
 // 2) It also assumes that x, y are already reduced mod m,
 //    or else the result will not be properly reduced.
 // 3) buffer_mult is an allocated array of length len(x)+len(y)
 func (z nat) montgomery(x, y, m, buffer nat, k Word) nat {
 	var c Word
 	n := len(m)
-	z = z.make(n)
 
 	intMult(buffer, x, y)
 	c = reductionMontgomery(buffer, m, k)
@@ -69,7 +68,7 @@ func (z nat) montgomery(x, y, m, buffer nat, k Word) nat {
 	// ConstantTimeCopy (from crypto/subtle) is adapted to operate on Words
 	xmask := Word(c - 1)
 	ymask := Word(^(c - 1))
-	for i := 0; i < len(z); i++ {
+	for i := 0; i < n; i++ {
 		z[i] = buffer[n+i]&xmask | buffer[i]&ymask
 	}
 	return z
