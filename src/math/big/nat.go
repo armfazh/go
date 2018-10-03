@@ -1140,9 +1140,12 @@ func (z nat) expNNMontgomery(x, y, m nat) nat {
 	const n = 4
 	// powers[i] contains x^i
 	var powers [1 << n]nat
+	powers[0] = powers[0].make(numWords)
 	powers[0] = powers[0].montgomery(one, RR, m, buffer, k0)
+	powers[1] = powers[1].make(numWords)
 	powers[1] = powers[1].montgomery(x, RR, m, buffer, k0)
 	for i := 2; i < 1<<n; i++ {
+		powers[i] = powers[i].make(numWords)
 		powers[i] = powers[i].montgomery(powers[i-1], powers[1], m, buffer, k0)
 	}
 
